@@ -13,10 +13,10 @@ export function AppLayout() {
     <div className="min-h-screen pb-24 md:pb-0">
       <div className="flag-band h-2 w-full" />
       <header className="sticky top-0 z-30 border-b bg-background/90 shadow-sm backdrop-blur">
-        <div className="container flex h-[72px] items-center justify-between gap-4 py-3">
+        <div className="container flex min-h-[64px] items-center justify-between gap-2 py-2 sm:gap-4 sm:py-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-secondary shadow-sm">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-secondary shadow-sm">
                 <Trophy className="h-5 w-5" />
               </span>
               <div className="min-w-0">
@@ -37,10 +37,10 @@ export function AppLayout() {
           </Button>
         </div>
       </header>
-      <main className="container py-6">
+      <main className="container py-4 sm:py-6">
         <Outlet />
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/96 px-3 py-2 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/96 px-2 py-2 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-md gap-2">
           <NavLink to="/predictions" label="Partidos" icon={<CalendarCheck className="h-5 w-5" />} />
           <NavLink to="/leaderboard" label="Tabla" icon={<BarChart3 className="h-5 w-5" />} />

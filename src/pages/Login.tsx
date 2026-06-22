@@ -47,8 +47,25 @@ export function Login() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-background px-4 py-8">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-lg border bg-white shadow-soft lg:grid-cols-[1fr_430px]">
+    <main className="grid min-h-svh place-items-stretch bg-background px-3 py-4 sm:place-items-center sm:px-4 sm:py-8">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-lg border bg-white shadow-soft lg:grid-cols-[minmax(0,1fr)_430px]">
+        <section className="relative bg-primary p-4 text-primary-foreground lg:hidden">
+          <div className="absolute inset-x-0 top-0 h-2 flag-band" />
+          <div className="flex items-center gap-3 pt-2">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-secondary text-primary shadow-sm">
+              <Trophy className="h-6 w-6" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-black leading-tight">Polla Colombia 2026</h1>
+              <p className="mt-1 text-xs font-bold text-white/78">Marcador y goleadores de Colombia.</p>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <ScoreRule value="3" label="Exacto" />
+            <ScoreRule value="2" label="Diferencia" />
+            <ScoreRule value="1" label="Resultado" />
+          </div>
+        </section>
         <section className="relative hidden min-h-[560px] bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
           <div className="absolute inset-x-0 top-0 h-3 flag-band" />
           <div>
@@ -61,32 +78,14 @@ export function Login() {
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-md bg-white/10 p-4">
-              <p className="text-2xl font-black text-secondary">3</p>
-              <p className="text-xs font-extrabold text-white/75">Exacto</p>
-            </div>
-            <div className="rounded-md bg-white/10 p-4">
-              <p className="text-2xl font-black text-secondary">2</p>
-              <p className="text-xs font-extrabold text-white/75">Diferencia</p>
-            </div>
-            <div className="rounded-md bg-white/10 p-4">
-              <p className="text-2xl font-black text-secondary">1</p>
-              <p className="text-xs font-extrabold text-white/75">Resultado</p>
-            </div>
+            <ScoreRule value="3" label="Exacto" />
+            <ScoreRule value="2" label="Diferencia" />
+            <ScoreRule value="1" label="Resultado" />
           </div>
         </section>
 
         <Card className="rounded-none border-0 shadow-none">
-          <CardHeader className="pb-3">
-            <div className="mb-3 flex items-center gap-3 lg:hidden">
-              <div className="grid h-12 w-12 place-items-center rounded-md bg-primary text-secondary">
-                <Trophy className="h-7 w-7" />
-              </div>
-              <div>
-                <p className="text-lg font-black text-primary">Polla Colombia 2026</p>
-                <p className="text-xs font-bold text-muted-foreground">La Gaitana Farms</p>
-              </div>
-            </div>
+          <CardHeader className="p-4 pb-3 sm:p-5 sm:pb-3">
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
               Acceso
@@ -132,6 +131,15 @@ export function Login() {
         </Card>
       </div>
     </main>
+  );
+}
+
+function ScoreRule({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="min-w-0 rounded-md bg-white/10 p-3 sm:p-4">
+      <p className="text-xl font-black text-secondary sm:text-2xl">{value}</p>
+      <p className="truncate text-[11px] font-extrabold text-white/75 sm:text-xs">{label}</p>
+    </div>
   );
 }
 

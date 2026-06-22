@@ -37,11 +37,19 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  html,
+  body,
+  #root {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
   button,
   input,
   select,
   textarea {
     font: inherit;
+    min-width: 0;
   }
 }
 
@@ -51,6 +59,6 @@
   }
 
   .score-input {
-    @apply h-14 text-center text-2xl font-black;
+    @apply h-12 text-center text-xl font-black sm:h-14 sm:text-2xl;
   }
 }

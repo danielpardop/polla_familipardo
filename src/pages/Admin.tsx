@@ -171,17 +171,17 @@ export function Admin() {
           <CardContent className="pt-5 text-sm font-bold text-muted-foreground">Cargando...</CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid min-w-0 gap-4 xl:grid-cols-2">
           {matches.map((match) => (
-            <Card key={match.id} className="overflow-hidden">
+            <Card key={match.id} className="min-w-0 overflow-hidden">
               <div className="flag-band h-1" />
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <CardTitle>
+                  <div className="min-w-0">
+                    <CardTitle className="break-words text-base sm:text-lg">
                       {match.home_flag} {match.home_team} vs {match.away_team} {match.away_flag}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="break-words">
                       {formatMatchDate(match.match_date)} / {match.venue}
                     </CardDescription>
                   </div>
@@ -190,18 +190,18 @@ export function Admin() {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-md bg-muted/75 p-3 text-sm font-extrabold">
+              <CardContent className="space-y-4 p-4 sm:p-5">
+                <div className="break-words rounded-md bg-muted/75 p-3 text-sm font-extrabold">
                   Resultado actual: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
                 </div>
 
                 <form className="space-y-4" onSubmit={(event) => finishMatch(event, match)}>
-                  <div className="grid gap-3 rounded-lg border bg-white p-3 sm:grid-cols-2">
+                  <div className="grid min-w-0 gap-3 rounded-lg border bg-white p-3 sm:grid-cols-2">
                     <ScoreInput match={match} side="home" value={drafts[match.id]?.home ?? ""} onChange={updateScore} />
                     <ScoreInput match={match} side="away" value={drafts[match.id]?.away ?? ""} onChange={updateScore} />
                   </div>
 
-                  <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="grid min-w-0 gap-3 lg:grid-cols-2">
                     <ScorerInputs
                       match={match}
                       teamName={match.home_team}
@@ -230,16 +230,16 @@ export function Admin() {
                     </div>
                   ) : null}
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" type="button" size="sm" onClick={() => closeMatch(match)} disabled={match.status !== "open" || savingId === match.id}>
+                  <div className="grid gap-2 sm:flex sm:flex-wrap">
+                    <Button className="w-full sm:w-auto" variant="outline" type="button" size="sm" onClick={() => closeMatch(match)} disabled={match.status !== "open" || savingId === match.id}>
                       <Lock className="h-4 w-4" />
                       Cerrar
                     </Button>
-                    <Button variant="secondary" type="button" size="sm" onClick={() => reopenMatch(match)} disabled={savingId === match.id}>
+                    <Button className="w-full sm:w-auto" variant="secondary" type="button" size="sm" onClick={() => reopenMatch(match)} disabled={savingId === match.id}>
                       <RotateCcw className="h-4 w-4" />
                       Abrir
                     </Button>
-                    <Button variant="accent" type="submit" size="sm" disabled={savingId === match.id}>
+                    <Button className="w-full sm:w-auto" variant="accent" type="submit" size="sm" disabled={savingId === match.id}>
                       <Trophy className="h-4 w-4" />
                       Finalizar
                     </Button>
@@ -267,8 +267,8 @@ function ScoreInput({
 }) {
   const teamName = side === "home" ? match.home_team : match.away_team;
   return (
-    <div className="space-y-2">
-      <Label htmlFor={`${match.id}-${side}`}>Goles {teamName}</Label>
+    <div className="min-w-0 space-y-2">
+      <Label className="block truncate text-xs sm:text-sm" htmlFor={`${match.id}-${side}`}>Goles {teamName}</Label>
       <Input
         id={`${match.id}-${side}`}
         type="number"
@@ -299,16 +299,16 @@ function ScorerInputs({
   onChange: (match: Match, teamName: string, slotIndex: number, field: "player_id" | "minute", value: string) => void;
 }) {
   if (goals <= 0) {
-    return <div className="rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">{teamName}: sin goles.</div>;
+    return <div className="min-w-0 break-words rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">{teamName}: sin goles.</div>;
   }
 
   return (
-    <div className="space-y-2 rounded-md border bg-white p-3">
-      <p className="text-sm font-black text-primary">{teamName}: goleadores reales</p>
+    <div className="min-w-0 space-y-2 rounded-md border bg-white p-3">
+      <p className="break-words text-sm font-black text-primary">{teamName}: goleadores reales</p>
       {Array.from({ length: goals }, (_, index) => (
-        <div key={`${match.id}-${teamName}-${index}`} className="grid gap-2 sm:grid-cols-[1fr_90px]">
+        <div key={`${match.id}-${teamName}-${index}`} className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_90px]">
           <select
-            className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm font-extrabold shadow-sm"
+            className="flex h-10 w-full min-w-0 rounded-md border border-input bg-white px-3 py-2 text-sm font-extrabold shadow-sm"
             value={selected[index]?.player_id ?? ""}
             onChange={(event) => onChange(match, teamName, index, "player_id", event.target.value)}
             required

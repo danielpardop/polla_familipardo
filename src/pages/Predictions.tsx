@@ -274,7 +274,7 @@ function MatchSection({
           <CardContent className="pt-5 text-sm font-bold text-muted-foreground">{empty}</CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid min-w-0 gap-4 xl:grid-cols-2">
           {matches.map((match) => (
             <PredictionCard
               key={match.id}
@@ -322,26 +322,26 @@ function PredictionCard({
   const canPredict = isPredictionOpen(match, nowMs);
 
   return (
-    <Card className={cn("overflow-hidden", canPredict ? "border-2 border-secondary" : "")}>
+    <Card className={cn("min-w-0 overflow-hidden", canPredict ? "border-2 border-secondary" : "")}>
       <div className="flag-band h-2" />
-      <CardHeader className="bg-secondary/10">
+      <CardHeader className="bg-secondary/10 p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Badge variant="secondary">Grupo K</Badge>
           <Badge variant={predictionStatusVariant(match, canPredict)}>{predictionStatusLabel(match, canPredict)}</Badge>
         </div>
-        <CardTitle className="flex flex-wrap items-center gap-3 text-2xl sm:text-3xl">
+        <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-xl sm:gap-3 sm:text-2xl md:text-3xl">
           <TeamName name={match.home_team} flag={match.home_flag} />
           <span className="text-muted-foreground">vs</span>
           <TeamName name={match.away_team} flag={match.away_flag} />
         </CardTitle>
-        <CardDescription className="flex flex-wrap items-center gap-2 text-sm font-extrabold">
-          <CalendarClock className="h-4 w-4" />
-          {formatMatchDate(match.match_date)} / {match.venue}
+        <CardDescription className="flex min-w-0 items-start gap-2 text-sm font-extrabold">
+          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
+          <span className="min-w-0 break-words">{formatMatchDate(match.match_date)} / {match.venue}</span>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 pt-5">
+      <CardContent className="space-y-4 p-4 sm:p-5">
         {match.status === "finished" ? (
-          <div className="rounded-md bg-muted p-3 text-sm font-extrabold">
+          <div className="break-words rounded-md bg-muted p-3 text-sm font-extrabold">
             Resultado final: {match.home_flag} {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}{" "}
             {match.away_flag}
           </div>
@@ -351,7 +351,7 @@ function PredictionCard({
 
         <form className="space-y-4" onSubmit={onSave}>
           <ScoreFields match={match} draft={draft} disabled={!canPredict} onScoreChange={onScoreChange} />
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-2">
             <ScorerSelects
               match={match}
               teamName={match.home_team}
@@ -371,9 +371,9 @@ function PredictionCard({
               onChange={onScorerChange}
             />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <PredictionSummary prediction={prediction} match={match} playersByTeam={playersByTeam} canPredict={canPredict} />
-            <Button type="submit" size="sm" disabled={!canPredict || saving}>
+            <Button type="submit" size="sm" className="w-full sm:w-auto" disabled={!canPredict || saving}>
               {canPredict ? <Save className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
               {canPredict ? "Guardar" : "Bloqueado"}
             </Button>
@@ -396,9 +396,9 @@ function ScoreFields({
   onScoreChange: (side: "home" | "away", value: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-3 rounded-lg bg-muted/65 p-3">
-      <div className="space-y-2">
-        <Label htmlFor={`${match.id}-home`}>{match.home_team}</Label>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2 rounded-lg bg-muted/65 p-2 sm:gap-3 sm:p-3">
+      <div className="min-w-0 space-y-2">
+        <Label className="block truncate text-xs sm:text-sm" htmlFor={`${match.id}-home`}>{match.home_team}</Label>
         <Input
           id={`${match.id}-home`}
           type="number"
@@ -412,9 +412,9 @@ function ScoreFields({
           required
         />
       </div>
-      <span className="pb-2 text-xl font-black text-muted-foreground">-</span>
-      <div className="space-y-2">
-        <Label htmlFor={`${match.id}-away`}>{match.away_team}</Label>
+      <span className="pb-2 text-lg font-black text-muted-foreground sm:text-xl">-</span>
+      <div className="min-w-0 space-y-2">
+        <Label className="block truncate text-xs sm:text-sm" htmlFor={`${match.id}-away`}>{match.away_team}</Label>
         <Input
           id={`${match.id}-away`}
           type="number"
@@ -451,15 +451,15 @@ function ScorerSelects({
 }) {
   if (goals <= 0) {
     return (
-      <div className="rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">
+      <div className="min-w-0 break-words rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">
         {teamName}: sin goles en tu marcador.
       </div>
     );
   }
 
   return (
-    <div className="space-y-2 rounded-md border bg-white p-3">
-      <p className="text-sm font-black text-primary">{teamName}: goleadores</p>
+    <div className="min-w-0 space-y-2 rounded-md border bg-white p-3">
+      <p className="break-words text-sm font-black text-primary">{teamName}: goleadores</p>
       {Array.from({ length: goals }, (_, index) => (
         <div key={`${match.id}-${teamName}-${index}`} className="space-y-1">
           <Label htmlFor={`${match.id}-${teamName}-${index}`} className="text-xs">
@@ -467,7 +467,7 @@ function ScorerSelects({
           </Label>
           <select
             id={`${match.id}-${teamName}-${index}`}
-            className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm font-extrabold shadow-sm"
+            className="flex h-10 w-full min-w-0 rounded-md border border-input bg-white px-3 py-2 text-sm font-extrabold shadow-sm"
             value={selectedIds[index] ?? ""}
             onChange={(event) => onChange(teamName, index, event.target.value)}
             disabled={disabled}
@@ -488,7 +488,7 @@ function ScorerSelects({
 
 function ActualScorers({ scorers }: { scorers: MatchScorerWithPlayer[] }) {
   return (
-    <div className="rounded-md border bg-white p-3">
+    <div className="min-w-0 rounded-md border bg-white p-3">
       <p className="mb-2 flex items-center gap-2 text-sm font-black text-primary">
         <Flag className="h-4 w-4" />
         Goleadores reales
@@ -526,22 +526,22 @@ function PredictionSummary({
     .map((scorer) => `${playersById.get(scorer.player_id) ?? "Jugador"} (${scorer.team_name})`);
 
   return (
-    <div className="space-y-1 text-sm font-bold text-muted-foreground">
-      <span className="inline-flex items-center gap-1">
-        <Check className="h-4 w-4 text-primary" />
+    <div className="min-w-0 space-y-1 text-sm font-bold text-muted-foreground">
+      <span className="flex min-w-0 flex-wrap items-center gap-1">
+        <Check className="h-4 w-4 shrink-0 text-primary" />
         Tu prediccion: {match.home_team} {prediction.home_goals} - {prediction.away_goals} {match.away_team}
         {match.status === "finished" ? ` / ${prediction.points ?? 0} pts` : ""}
       </span>
-      {scorerNames.length > 0 ? <p className="text-xs">Goles: {scorerNames.join(", ")}</p> : null}
+      {scorerNames.length > 0 ? <p className="break-words text-xs">Goles: {scorerNames.join(", ")}</p> : null}
     </div>
   );
 }
 
 function TeamName({ name, flag }: { name: string; flag: string }) {
   return (
-    <span className="inline-flex items-center gap-2">
-      <span className="rounded bg-white px-1.5 py-0.5 text-base shadow-sm">{flag}</span>
-      <span>{name}</span>
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <span className="shrink-0 rounded bg-white px-1.5 py-0.5 text-base shadow-sm">{flag}</span>
+      <span className="min-w-0 break-words">{name}</span>
     </span>
   );
 }
