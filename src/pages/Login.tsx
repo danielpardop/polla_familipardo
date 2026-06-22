@@ -1,0 +1,177 @@
+import { FormEvent, useState } from "react";
+import { KeyRound, ShieldCheck, Trophy, UserPlus } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+
+export function Login() {
+  const { signInWithPassword, signUpWithPassword } = useAuth();
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      await signInWithPassword(email, password);
+      toast.success("Sesion iniciada.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No pudimos iniciar sesion.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRegister(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (fullName.trim().length < 2) {
+      toast.error("Escribe tu nombre completo.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signUpWithPassword(email, password, fullName);
+      toast.success("Cuenta creada. Si Supabase pide confirmacion, revisa tu correo.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No pudimos crear la cuenta.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="grid min-h-screen place-items-center bg-background px-4 py-8">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-lg border bg-white shadow-soft lg:grid-cols-[1fr_430px]">
+        <section className="relative hidden min-h-[560px] bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute inset-x-0 top-0 h-3 flag-band" />
+          <div>
+            <div className="grid h-14 w-14 place-items-center rounded-lg bg-secondary text-primary shadow-sm">
+              <Trophy className="h-8 w-8" />
+            </div>
+            <h1 className="mt-8 max-w-md text-5xl font-black leading-none">Polla Colombia 2026</h1>
+            <p className="mt-4 max-w-sm text-base font-bold text-white/78">
+              Predice los partidos de Colombia, el marcador y los jugadores que hacen los goles.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-md bg-white/10 p-4">
+              <p className="text-2xl font-black text-secondary">3</p>
+              <p className="text-xs font-extrabold text-white/75">Exacto</p>
+            </div>
+            <div className="rounded-md bg-white/10 p-4">
+              <p className="text-2xl font-black text-secondary">2</p>
+              <p className="text-xs font-extrabold text-white/75">Diferencia</p>
+            </div>
+            <div className="rounded-md bg-white/10 p-4">
+              <p className="text-2xl font-black text-secondary">1</p>
+              <p className="text-xs font-extrabold text-white/75">Resultado</p>
+            </div>
+          </div>
+        </section>
+
+        <Card className="rounded-none border-0 shadow-none">
+          <CardHeader className="pb-3">
+            <div className="mb-3 flex items-center gap-3 lg:hidden">
+              <div className="grid h-12 w-12 place-items-center rounded-md bg-primary text-secondary">
+                <Trophy className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-lg font-black text-primary">Polla Colombia 2026</p>
+                <p className="text-xs font-bold text-muted-foreground">La Gaitana Farms</p>
+              </div>
+            </div>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              Acceso
+            </CardTitle>
+            <CardDescription>Entra o crea tu cuenta con Supabase Auth.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="login">
+              <TabsList className="mb-4 grid w-full grid-cols-2">
+                <TabsTrigger value="login">Entrar</TabsTrigger>
+                <TabsTrigger value="register">Registro</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <form className="space-y-4" onSubmit={handleLogin}>
+                  <AuthFields email={email} password={password} setEmail={setEmail} setPassword={setPassword} />
+                  <Button className="w-full" type="submit" disabled={loading}>
+                    <KeyRound className="h-4 w-4" />
+                    Entrar
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="register">
+                <form className="space-y-4" onSubmit={handleRegister}>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-name">Nombre completo</Label>
+                    <Input
+                      id="register-name"
+                      autoComplete="name"
+                      value={fullName}
+                      onChange={(event) => setFullName(event.target.value)}
+                      required
+                    />
+                  </div>
+                  <AuthFields email={email} password={password} setEmail={setEmail} setPassword={setPassword} />
+                  <Button className="w-full" type="submit" disabled={loading}>
+                    <UserPlus className="h-4 w-4" />
+                    Crear cuenta
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  );
+}
+
+function AuthFields({
+  email,
+  password,
+  setEmail,
+  setPassword,
+}: {
+  email: string;
+  password: string;
+  setEmail: (value: string) => void;
+  setPassword: (value: string) => void;
+}) {
+  return (
+    <>
+      <div className="space-y-2">
+        <Label htmlFor="login-email">Correo</Label>
+        <Input
+          id="login-email"
+          type="email"
+          autoComplete="email"
+          placeholder="tu@correo.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="login-password">Contrasena</Label>
+        <Input
+          id="login-password"
+          type="password"
+          autoComplete="current-password"
+          minLength={6}
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
+      </div>
+    </>
+  );
+}
