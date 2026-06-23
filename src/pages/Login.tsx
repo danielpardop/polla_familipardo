@@ -13,6 +13,7 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [showRecovery, setShowRecovery] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
@@ -108,23 +109,57 @@ export function Login() {
               <ShieldCheck className="h-5 w-5 text-primary" />
               Acceso
             </CardTitle>
-            <CardDescription>Entra o crea tu cuenta con Supabase Auth.</CardDescription>
+            <CardDescription>{showRecovery ? "Recibe un enlace para cambiar tu contrasena." : "Entra o crea tu cuenta con Supabase Auth."}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
-              <TabsList className="mb-4 grid w-full grid-cols-3">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="register">Registro</TabsTrigger>
-                <TabsTrigger value="reset">Recuperar</TabsTrigger>
+              <TabsList className="mb-4 grid w-full grid-cols-2">
+                <TabsTrigger value="login" onClick={() => setShowRecovery(false)}>Entrar</TabsTrigger>
+                <TabsTrigger value="register" onClick={() => setShowRecovery(false)}>Registro</TabsTrigger>
               </TabsList>
               <TabsContent value="login">
-                <form className="space-y-4" onSubmit={handleLogin}>
-                  <AuthFields email={email} password={password} setEmail={setEmail} setPassword={setPassword} />
-                  <Button className="w-full" type="submit" disabled={loading}>
-                    <KeyRound className="h-4 w-4" />
-                    Entrar
-                  </Button>
-                </form>
+                {showRecovery ? (
+                  <form className="space-y-4" onSubmit={handlePasswordReset}>
+                    <div className="rounded-md border bg-muted/65 p-3 text-sm font-bold text-muted-foreground">
+                      Escribe el correo de tu cuenta y te enviaremos el enlace para crear una contrasena nueva.
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Correo</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="tu@correo.com"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button className="w-full" type="submit" disabled={loading}>
+                      Enviar enlace
+                    </Button>
+                    <Button className="w-full" type="button" variant="ghost" onClick={() => setShowRecovery(false)} disabled={loading}>
+                      Volver a entrar
+                    </Button>
+                  </form>
+                ) : (
+                  <form className="space-y-4" onSubmit={handleLogin}>
+                    <AuthFields email={email} password={password} setEmail={setEmail} setPassword={setPassword} />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        className="text-sm font-extrabold text-primary underline-offset-4 hover:underline"
+                        onClick={() => setShowRecovery(true)}
+                      >
+                        Olvide mi contrasena
+                      </button>
+                    </div>
+                    <Button className="w-full" type="submit" disabled={loading}>
+                      <KeyRound className="h-4 w-4" />
+                      Entrar
+                    </Button>
+                  </form>
+                )}
               </TabsContent>
               <TabsContent value="register">
                 <form className="space-y-4" onSubmit={handleRegister}>
@@ -142,25 +177,6 @@ export function Login() {
                   <Button className="w-full" type="submit" disabled={loading}>
                     <UserPlus className="h-4 w-4" />
                     Crear cuenta
-                  </Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="reset">
-                <form className="space-y-4" onSubmit={handlePasswordReset}>
-                  <div className="space-y-2">
-                    <Label htmlFor="reset-email">Correo</Label>
-                    <Input
-                      id="reset-email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="tu@correo.com"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button className="w-full" type="submit" disabled={loading}>
-                    Enviar enlace
                   </Button>
                 </form>
               </TabsContent>
