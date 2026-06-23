@@ -42,8 +42,9 @@ export function ResetPassword() {
   }
 
   return (
-    <main className="grid min-h-svh place-items-center bg-background px-4 py-8">
-      <Card className="w-full max-w-md">
+    <main className="grid min-h-svh place-items-center px-4 py-8">
+      <Card className="w-full max-w-md overflow-hidden">
+        <div className="flag-band h-1.5" />
         <CardHeader>
           <div className="mb-2 grid h-12 w-12 place-items-center rounded-md bg-primary text-secondary">
             <KeyRound className="h-6 w-6" />

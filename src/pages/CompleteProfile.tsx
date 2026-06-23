@@ -37,14 +37,15 @@ export function CompleteProfile() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-background px-4 py-8">
-      <Card className="w-full max-w-md">
+    <main className="grid min-h-screen place-items-center px-4 py-8">
+      <Card className="w-full max-w-md overflow-hidden">
+        <div className="flag-band h-1.5" />
         <CardHeader>
-          <div className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-secondary text-primary">
+          <div className="mb-2 grid h-12 w-12 place-items-center rounded-md bg-secondary text-primary shadow-sm">
             <UserRoundCheck className="h-6 w-6" />
           </div>
           <CardTitle>Completa tu perfil</CardTitle>
-          <CardDescription>Este nombre aparecera en la tabla de posiciones.</CardDescription>
+          <CardDescription>Este nombre aparecera en la tabla de posiciones y en tus predicciones.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>

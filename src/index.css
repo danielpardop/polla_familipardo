@@ -4,22 +4,22 @@
 
 @layer base {
   :root {
-    --background: 45 88% 96%;
-    --foreground: 220 38% 14%;
+    --background: 210 40% 98%;
+    --foreground: 220 40% 13%;
     --card: 0 0% 100%;
-    --card-foreground: 220 38% 14%;
-    --primary: 216 78% 22%;
+    --card-foreground: 220 40% 13%;
+    --primary: 216 72% 22%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 47 95% 58%;
-    --secondary-foreground: 220 38% 14%;
-    --accent: 354 73% 48%;
+    --secondary: 45 96% 57%;
+    --secondary-foreground: 220 40% 13%;
+    --accent: 354 70% 46%;
     --accent-foreground: 0 0% 100%;
-    --muted: 48 42% 92%;
-    --muted-foreground: 219 16% 42%;
+    --muted: 214 26% 93%;
+    --muted-foreground: 220 14% 43%;
     --destructive: 0 73% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 42 30% 84%;
-    --input: 42 30% 84%;
+    --border: 214 25% 86%;
+    --input: 214 25% 86%;
     --ring: 216 78% 22%;
     --radius: 0.5rem;
   }
@@ -31,8 +31,9 @@
   body {
     @apply min-h-screen bg-background text-foreground antialiased;
     background-image:
-      linear-gradient(135deg, hsl(47 95% 58% / 0.12) 0 12%, transparent 12% 100%),
-      linear-gradient(180deg, hsl(216 78% 22% / 0.05), transparent 360px);
+      linear-gradient(180deg, hsl(216 72% 22% / 0.08), transparent 420px),
+      linear-gradient(135deg, hsl(45 96% 57% / 0.1) 0 16%, transparent 16% 100%),
+      repeating-linear-gradient(90deg, hsl(214 25% 86% / 0.22) 0 1px, transparent 1px 44px);
     background-attachment: fixed;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
@@ -56,6 +57,18 @@
 @layer components {
   .flag-band {
     background: linear-gradient(90deg, #f7d339 0 46%, #244b8f 46% 76%, #c92337 76% 100%);
+  }
+
+  .app-surface {
+    @apply border bg-white/92 shadow-soft ring-1 ring-white/75 backdrop-blur;
+  }
+
+  .metric-tile {
+    @apply min-w-0 rounded-lg border bg-white/90 p-4 shadow-soft ring-1 ring-white/70;
+  }
+
+  .section-title {
+    @apply text-base font-black text-primary sm:text-lg;
   }
 
   .score-input {

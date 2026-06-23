@@ -66,12 +66,12 @@ export function Login() {
   }
 
   return (
-    <main className="grid min-h-svh place-items-stretch bg-background px-3 py-4 sm:place-items-center sm:px-4 sm:py-8">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-lg border bg-white shadow-soft lg:grid-cols-[minmax(0,1fr)_430px]">
+    <main className="grid min-h-svh place-items-stretch px-3 py-4 sm:place-items-center sm:px-4 sm:py-8">
+      <div className="grid w-full max-w-6xl overflow-hidden rounded-lg border bg-white/96 shadow-soft ring-1 ring-white/70 lg:grid-cols-[minmax(0,1fr)_440px]">
         <section className="relative bg-primary p-4 text-primary-foreground lg:hidden">
           <div className="absolute inset-x-0 top-0 h-2 flag-band" />
           <div className="flex items-center gap-3 pt-2">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-secondary text-primary shadow-sm">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-secondary text-primary shadow-sm ring-1 ring-white/20">
               <Trophy className="h-6 w-6" />
             </div>
             <div className="min-w-0">
@@ -86,23 +86,24 @@ export function Login() {
             <ScoreRule value="+1" label="Por goleador" />
           </div>
         </section>
-        <section className="relative hidden min-h-[560px] bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
+        <section className="relative hidden min-h-[620px] overflow-hidden bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
           <div className="absolute inset-x-0 top-0 h-3 flag-band" />
+          <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "linear-gradient(135deg, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
           <div>
-            <div className="grid h-14 w-14 place-items-center rounded-lg bg-secondary text-primary shadow-sm">
+            <div className="relative grid h-14 w-14 place-items-center rounded-lg bg-secondary text-primary shadow-sm ring-1 ring-white/20">
               <Trophy className="h-8 w-8" />
             </div>
-            <h1 className="mt-8 max-w-md text-5xl font-black leading-none">Polla Familia Pardo</h1>
-            <p className="mt-4 max-w-sm text-base font-bold text-white/78">
+            <h1 className="relative mt-8 max-w-md text-5xl font-black leading-none">Polla Familia Pardo</h1>
+            <p className="relative mt-4 max-w-sm text-base font-bold leading-relaxed text-white/78">
               Una dinamica familiar para seguir a Colombia: predice marcadores, escoge goleadores y suma puntos con cada acierto.
             </p>
-            <div className="mt-8 grid gap-3 text-sm font-bold text-white/82">
+            <div className="relative mt-8 grid gap-3 text-sm font-bold text-white/82">
               <LoginNote icon={<Flag className="h-4 w-4" />} text="Solo jugamos con los partidos de Colombia." />
               <LoginNote icon={<ListChecks className="h-4 w-4" />} text="Tus predicciones quedan bloqueadas cuando empieza el partido." />
               <LoginNote icon={<Users className="h-4 w-4" />} text="La tabla muestra total, puntos por marcador y goleadores acertados." />
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="relative grid grid-cols-4 gap-3">
             <ScoreRule value="6" label="Exacto" />
             <ScoreRule value="4" label="Diferencia / empate" />
             <ScoreRule value="3" label="Ganador" />
@@ -110,9 +111,9 @@ export function Login() {
           </div>
         </section>
 
-        <Card className="rounded-none border-0 shadow-none">
-          <CardHeader className="p-4 pb-3 sm:p-5 sm:pb-3">
-            <CardTitle className="flex items-center gap-2">
+        <Card className="rounded-none border-0 bg-white shadow-none">
+          <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-xl">
               <ShieldCheck className="h-5 w-5 text-primary" />
               Entra a la polla
             </CardTitle>
@@ -131,7 +132,7 @@ export function Login() {
               <TabsContent value="login">
                 {showRecovery ? (
                   <form className="space-y-4" onSubmit={handlePasswordReset}>
-                    <div className="rounded-md border bg-muted/65 p-3 text-sm font-bold text-muted-foreground">
+                    <div className="rounded-md border bg-muted/65 p-3 text-sm font-bold leading-relaxed text-muted-foreground">
                       Escribe el correo con el que te registraste y te enviaremos el enlace para recuperar el acceso.
                     </div>
                     <div className="space-y-2">
@@ -155,7 +156,7 @@ export function Login() {
                   </form>
                 ) : (
                   <form className="space-y-4" onSubmit={handleLogin}>
-                    <div className="rounded-md bg-secondary/25 p-3 text-sm font-extrabold text-primary">
+                    <div className="rounded-md bg-secondary/25 p-3 text-sm font-extrabold leading-relaxed text-primary">
                       Hola familia, entra para guardar tus pronosticos y ver como va la tabla.
                     </div>
                     <AuthFields email={email} password={password} setEmail={setEmail} setPassword={setPassword} />
@@ -177,7 +178,7 @@ export function Login() {
               </TabsContent>
               <TabsContent value="register">
                 <form className="space-y-4" onSubmit={handleRegister}>
-                  <div className="rounded-md bg-muted/65 p-3 text-sm font-bold text-muted-foreground">
+                  <div className="rounded-md bg-muted/65 p-3 text-sm font-bold leading-relaxed text-muted-foreground">
                     Crea tu cuenta con tu nombre para que la familia te reconozca en la tabla.
                   </div>
                   <div className="space-y-2">

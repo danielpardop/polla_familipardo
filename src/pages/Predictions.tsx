@@ -3,7 +3,7 @@ import { CalendarClock, Check, Flag, Lock, RefreshCw, Save, Trophy } from "lucid
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/CountryFlag";
 import { PageHeader } from "@/components/PageHeader";
-import { PlayerCombobox, playerLabel } from "@/components/PlayerCombobox";
+import { PlayerCombobox } from "@/components/PlayerCombobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, type Match, type MatchScorerWithPlayer, type Player, type PredictionWithScorers } from "@/lib/api";
 import { formatMatchDate } from "@/lib/date";
+import { playerLabel } from "@/lib/players";
 import { cn, formatScore } from "@/lib/utils";
 
 type Draft = {
@@ -162,7 +163,7 @@ export function Predictions() {
   }
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-6">
       <PageHeader
         title="Polla de Colombia"
         description="Partidos de Colombia en el Mundial: resultados jugados y predicciones pendientes."
@@ -174,7 +175,7 @@ export function Predictions() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3 lg:gap-4">
         <MiniStat label="Pendientes" value={stats.pending} />
         <MiniStat label="Guardadas" value={stats.saved} />
         <MiniStat label="Tus puntos" value={stats.points} />
@@ -226,12 +227,12 @@ export function Predictions() {
 
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border bg-white p-4 shadow-soft">
+    <div className="metric-tile flex items-center justify-between gap-3">
       <div>
         <p className="text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
         <p className="mt-1 text-2xl font-black text-primary">{value}</p>
       </div>
-      <div className="grid h-10 w-10 place-items-center rounded-md bg-secondary text-primary">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-primary shadow-sm">
         <Trophy className="h-5 w-5" />
       </div>
     </div>
@@ -268,7 +269,7 @@ function MatchSection({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black text-primary">{title}</h2>
+        <h2 className="section-title">{title}</h2>
         <Badge variant="secondary">{matches.length}</Badge>
       </div>
       {matches.length === 0 ? (
@@ -324,26 +325,26 @@ function PredictionCard({
   const canPredict = isPredictionOpen(match, nowMs);
 
   return (
-    <Card className={cn("min-w-0 overflow-visible", canPredict ? "border-2 border-secondary" : "")}>
-      <div className="flag-band h-2" />
-      <CardHeader className="bg-secondary/10 p-4 sm:p-5">
+    <Card className={cn("min-w-0 overflow-visible", canPredict ? "border-2 border-secondary/80" : "")}>
+      <div className="flag-band h-1.5 rounded-t-lg" />
+      <CardHeader className="bg-muted/45 p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Badge variant="secondary">Grupo K</Badge>
           <Badge variant={predictionStatusVariant(match, canPredict)}>{predictionStatusLabel(match, canPredict)}</Badge>
         </div>
-        <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-xl sm:gap-3 sm:text-2xl md:text-3xl">
+        <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-xl sm:gap-3 sm:text-2xl">
           <TeamName name={match.home_team} />
           <span className="text-muted-foreground">vs</span>
           <TeamName name={match.away_team} />
         </CardTitle>
-        <CardDescription className="flex min-w-0 items-start gap-2 text-sm font-extrabold">
+        <CardDescription className="flex min-w-0 items-start gap-2 text-sm font-extrabold leading-relaxed">
           <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
           <span className="min-w-0 break-words">{formatMatchDate(match.match_date)} / {match.venue}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-4 sm:p-5">
         {match.status === "finished" ? (
-          <div className="break-words rounded-md bg-muted p-3 text-sm font-extrabold">
+          <div className="break-words rounded-md border bg-muted/70 p-3 text-sm font-extrabold">
             Resultado final: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
           </div>
         ) : null}
@@ -380,7 +381,7 @@ function PredictionCard({
             </div>
           </form>
         ) : (
-          <div className="rounded-md border bg-white p-3">
+          <div className="rounded-md border bg-white/90 p-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <PredictionSummary prediction={prediction} match={match} playersByTeam={playersByTeam} canPredict={canPredict} />
               <Badge variant="muted">
@@ -407,7 +408,7 @@ function ScoreFields({
   onScoreChange: (side: "home" | "away", value: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2 rounded-lg bg-muted/65 p-2 sm:gap-3 sm:p-3">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2 rounded-lg border bg-muted/55 p-2 sm:gap-3 sm:p-3">
       <div className="min-w-0 space-y-2">
         <Label className="block truncate text-xs sm:text-sm" htmlFor={`${match.id}-home`}>{match.home_team}</Label>
         <Input
@@ -460,14 +461,14 @@ function ScorerSelects({
 }) {
   if (goals <= 0) {
     return (
-      <div className="min-w-0 break-words rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">
+      <div className="min-w-0 break-words rounded-md border bg-white/90 p-3 text-sm font-bold text-muted-foreground">
         {teamName}: sin goles en tu marcador.
       </div>
     );
   }
 
   return (
-    <div className="min-w-0 space-y-2 rounded-md border bg-white p-3">
+    <div className="min-w-0 space-y-2 rounded-md border bg-white/90 p-3">
       <p className="break-words text-sm font-black text-primary">{teamName}: goleadores</p>
       {Array.from({ length: goals }, (_, index) => (
         <div key={`${match.id}-${teamName}-${index}`} className="space-y-1">
@@ -489,7 +490,7 @@ function ScorerSelects({
 
 function ActualScorers({ scorers }: { scorers: MatchScorerWithPlayer[] }) {
   return (
-    <div className="min-w-0 rounded-md border bg-white p-3">
+    <div className="min-w-0 rounded-md border bg-white/90 p-3">
       <p className="mb-2 flex items-center gap-2 text-sm font-black text-primary">
         <Flag className="h-4 w-4" />
         Goleadores reales

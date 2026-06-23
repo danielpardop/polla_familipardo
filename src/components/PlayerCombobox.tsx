@@ -1,26 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import type { Player } from "@/lib/api";
+import { playerLabel, sortPlayersForScorerSelect } from "@/lib/players";
 import { cn } from "@/lib/utils";
-
-const positionOrder: Record<string, number> = {
-  Delantero: 1,
-  Mediocampista: 2,
-  Defensa: 3,
-  Arquero: 4,
-};
-
-export function playerLabel(player: Pick<Player, "name" | "position">) {
-  return `${player.name} - (${player.position || "Sin posicion"})`;
-}
-
-export function sortPlayersForScorerSelect(players: Player[]) {
-  return [...players].sort((a, b) => {
-    const byPosition = (positionOrder[a.position] ?? 99) - (positionOrder[b.position] ?? 99);
-    if (byPosition !== 0) return byPosition;
-    return a.name.localeCompare(b.name, "es");
-  });
-}
 
 export function PlayerCombobox({
   id,
@@ -64,7 +46,7 @@ export function PlayerCombobox({
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           id={id}
-          className="h-10 w-full rounded-md border border-input bg-white py-2 pl-9 pr-3 text-sm font-extrabold shadow-sm outline-none transition focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 w-full rounded-md border border-input bg-white py-2 pl-9 pr-3 text-sm font-extrabold shadow-sm outline-none transition focus:border-primary/45 focus:ring-2 focus:ring-ring/25 disabled:cursor-not-allowed disabled:opacity-60"
           value={open ? query : selectedPlayer ? playerLabel(selectedPlayer) : ""}
           placeholder={selectedPlayer ? playerLabel(selectedPlayer) : placeholder}
           disabled={disabled}
@@ -80,7 +62,7 @@ export function PlayerCombobox({
         />
       </div>
       {open && !disabled ? (
-        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg ring-1 ring-black/5">
           {visiblePlayers.length === 0 ? (
             <div className="px-3 py-2 text-sm font-bold text-muted-foreground">Sin resultados</div>
           ) : (

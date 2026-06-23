@@ -1,15 +1,5 @@
+import { getTeamFlagCode } from "@/lib/teams";
 import { cn } from "@/lib/utils";
-
-const teamFlagCodes: Record<string, string> = {
-  Colombia: "co",
-  Portugal: "pt",
-  Uzbekistan: "uz",
-  "R. D. del Congo": "cd",
-};
-
-export function getTeamFlagCode(teamName: string) {
-  return teamFlagCodes[teamName] ?? null;
-}
 
 export function CountryFlag({ teamName, className }: { teamName: string; className?: string }) {
   const code = getTeamFlagCode(teamName);

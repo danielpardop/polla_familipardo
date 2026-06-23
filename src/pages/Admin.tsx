@@ -201,7 +201,7 @@ export function Admin() {
   }
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-6">
       <PageHeader
         title="Panel admin"
         description="Cierra partidos y carga resultados reales de Colombia."
@@ -229,7 +229,7 @@ export function Admin() {
               Usuarios
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="matches">
+          <TabsContent value="matches" className="mt-5">
             <div className="grid min-w-0 gap-4 xl:grid-cols-2">
               {matches.map((match) => (
                 <MatchAdminCard
@@ -248,7 +248,7 @@ export function Admin() {
               ))}
             </div>
           </TabsContent>
-          <TabsContent value="users">
+          <TabsContent value="users" className="mt-5">
             <UsersAdmin
               users={users}
               currentUserId={user?.id ?? null}
@@ -290,8 +290,8 @@ function MatchAdminCard({
 
   return (
     <Card className="min-w-0 overflow-visible">
-      <div className="flag-band h-1" />
-      <CardHeader className="p-4 sm:p-5">
+      <div className="flag-band h-1.5 rounded-t-lg" />
+      <CardHeader className="bg-muted/35 p-4 sm:p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <CardTitle className="flex flex-wrap items-center gap-2 break-words text-base sm:text-lg">
@@ -311,7 +311,7 @@ function MatchAdminCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 p-4 sm:p-5">
-        <div className="break-words rounded-md bg-muted/75 p-3 text-sm font-extrabold">
+        <div className="break-words rounded-md border bg-muted/65 p-3 text-sm font-extrabold">
           Resultado actual: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
         </div>
 
@@ -326,12 +326,12 @@ function MatchAdminCard({
         ) : null}
 
         {isFinished ? (
-          <div className="rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">
+          <div className="rounded-md border bg-white/90 p-3 text-sm font-bold text-muted-foreground">
             Partido finalizado. Bloqueado en modo solo lectura.
           </div>
         ) : (
           <form className="space-y-4" onSubmit={(event) => onFinish(event, match)}>
-            <div className="grid min-w-0 gap-3 rounded-lg border bg-white p-3 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-3 rounded-lg border bg-white/90 p-3 sm:grid-cols-2">
               <ScoreInput match={match} side="home" value={draft?.home ?? ""} onChange={onScoreChange} />
               <ScoreInput match={match} side="away" value={draft?.away ?? ""} onChange={onScoreChange} />
             </div>
@@ -398,14 +398,14 @@ function UsersAdmin({
 
   return (
     <Card className="overflow-hidden">
-      <div className="flag-band h-1" />
+      <div className="flag-band h-1.5" />
       <CardHeader className="p-4 sm:p-5">
         <CardTitle>Usuarios</CardTitle>
         <CardDescription>Gestiona participantes registrados y permisos de admin.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 p-4 sm:p-5">
         {users.map((item) => (
-          <div key={item.id} className="grid gap-3 rounded-md border bg-white p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div key={item.id} className="grid gap-3 rounded-md border bg-white/90 p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
             <div className="min-w-0">
               <p className="break-words text-sm font-black text-primary">{item.full_name || "Sin nombre"}</p>
               <p className="break-words text-xs font-bold text-muted-foreground">{item.email}</p>
@@ -485,11 +485,11 @@ function ScorerInputs({
   onChange: (match: Match, teamName: string, slotIndex: number, field: "player_id" | "minute", value: string) => void;
 }) {
   if (goals <= 0) {
-    return <div className="min-w-0 break-words rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">{teamName}: sin goles.</div>;
+    return <div className="min-w-0 break-words rounded-md border bg-white/90 p-3 text-sm font-bold text-muted-foreground">{teamName}: sin goles.</div>;
   }
 
   return (
-    <div className="min-w-0 space-y-2 rounded-md border bg-white p-3">
+    <div className="min-w-0 space-y-2 rounded-md border bg-white/90 p-3">
       <p className="break-words text-sm font-black text-primary">{teamName}: goleadores reales</p>
       {Array.from({ length: goals }, (_, index) => (
         <div key={`${match.id}-${teamName}-${index}`} className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_90px]">

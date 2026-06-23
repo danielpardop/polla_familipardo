@@ -27,7 +27,7 @@ export function Leaderboard() {
   }, []);
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-6">
       <PageHeader
         title="Tabla de posiciones"
         description="La carrera amistosa de la Familia Pardo por el marcador perfecto y los goleadores bien elegidos."
@@ -40,9 +40,9 @@ export function Leaderboard() {
       />
 
       <Card className="overflow-hidden">
-        <div className="flag-band h-1" />
-        <CardContent className="grid gap-3 p-4 text-sm font-bold text-muted-foreground sm:grid-cols-[auto_1fr] sm:p-5">
-          <div className="grid h-10 w-10 place-items-center rounded-md bg-secondary text-primary">
+        <div className="flag-band h-1.5" />
+        <CardContent className="grid gap-3 p-4 text-sm font-bold leading-relaxed text-muted-foreground sm:grid-cols-[auto_1fr] sm:p-5">
+          <div className="grid h-10 w-10 place-items-center rounded-md bg-secondary text-primary shadow-sm">
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="space-y-1">
@@ -69,7 +69,7 @@ export function Leaderboard() {
             <>
               <div className="divide-y md:hidden">
                 {rows.map((row, index) => (
-                  <div key={row.user_id} className="bg-white/80 p-4">
+                  <div key={row.user_id} className="bg-white/92 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="flex items-center gap-2 text-sm font-black text-primary">
@@ -108,7 +108,7 @@ export function Leaderboard() {
                 </thead>
                 <tbody className="divide-y">
                   {rows.map((row, index) => (
-                    <tr key={row.user_id} className="bg-white/80 transition-colors hover:bg-secondary/10">
+                    <tr key={row.user_id} className="bg-white/92 transition-colors hover:bg-secondary/10">
                       <td className="px-4 py-3 font-black">
                         <span className="inline-flex items-center gap-2">
                           {index < 3 ? <Medal className="h-4 w-4 text-secondary" /> : null}
@@ -145,7 +145,7 @@ export function Leaderboard() {
 
 function MobileMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md bg-muted/70 p-2">
+    <div className="rounded-md border bg-muted/55 p-2">
       <p className="text-[11px] font-black uppercase text-muted-foreground">{label}</p>
       <p className="mt-1 text-base font-black text-primary">{value}</p>
     </div>
