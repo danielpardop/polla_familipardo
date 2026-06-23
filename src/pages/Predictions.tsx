@@ -540,85 +540,84 @@ function FinishedMatchSummary({
   const predictedAwayScorers = scorerRows.filter((scorer) => scorer.teamName === match.away_team);
 
   return (
-    <div className="min-w-0 space-y-3 rounded-md border bg-white/95 p-3 text-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="min-w-0 overflow-hidden rounded-md border bg-white/95 text-sm">
+      <div className="border-b bg-muted/35 px-3 py-2">
         <p className="font-black text-primary">Partido finalizado</p>
-        <Badge variant="secondary">{totalPoints} pts</Badge>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
-        <SummaryLine label="Real" value={`${match.home_team} ${formatScore(match.home_goals, match.away_goals)} ${match.away_team}`} />
-        <SummaryLine
-          label="Tu prediccion"
-          value={
+      <div className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+        <FinishedSide
+          title="Resultado real"
+          score={`${match.home_team} ${formatScore(match.home_goals, match.away_goals)} ${match.away_team}`}
+          homeTeam={match.home_team}
+          awayTeam={match.away_team}
+          homeScorers={actualHomeScorers.map((scorer) => scorer.label)}
+          awayScorers={actualAwayScorers.map((scorer) => scorer.label)}
+        />
+        <FinishedSide
+          title="Tu prediccion"
+          score={
             prediction
               ? `${match.home_team} ${prediction.home_goals} - ${prediction.away_goals} ${match.away_team}`
               : "No realizada"
           }
+          homeTeam={match.home_team}
+          awayTeam={match.away_team}
+          homeScorers={predictedHomeScorers.map((scorer) => predictedScorerLabel(scorer))}
+          awayScorers={predictedAwayScorers.map((scorer) => predictedScorerLabel(scorer))}
         />
       </div>
 
-      {prediction ? (
-        <p className="break-words text-xs font-bold text-muted-foreground">
-          Marcador: {scorePointLabel(prediction.points)} ({scorePoints} pts) / Goleadores: {scorerPoints} pts
-        </p>
-      ) : (
-        <p className="text-xs font-bold text-muted-foreground">No registraste prediccion para este partido.</p>
-      )}
-
-      <div className="grid gap-3 border-t pt-3 sm:grid-cols-2">
-        <CompactScorerList teamName={match.home_team} actual={actualHomeScorers} predicted={predictedHomeScorers} />
-        <CompactScorerList teamName={match.away_team} actual={actualAwayScorers} predicted={predictedAwayScorers} />
+      <div className="border-t bg-secondary/25 px-3 py-2 text-center font-black text-primary">
+        Con este partido ganaste {totalPoints} puntos.
       </div>
     </div>
   );
 }
 
-function SummaryLine({ label, value }: { label: string; value: string }) {
+function FinishedSide({
+  title,
+  score,
+  homeTeam,
+  awayTeam,
+  homeScorers,
+  awayScorers,
+}: {
+  title: string;
+  score: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScorers: string[];
+  awayScorers: string[];
+}) {
   return (
-    <div className="min-w-0">
-      <p className="text-xs font-black uppercase text-muted-foreground">{label}</p>
-      <p className="break-words font-black text-foreground">{value}</p>
+    <div className="min-w-0 space-y-3 p-3">
+      <div className="min-w-0">
+        <p className="text-xs font-black uppercase text-muted-foreground">{title}</p>
+        <p className="break-words text-base font-black text-foreground">{score}</p>
+      </div>
+      <div className="space-y-1.5">
+        <ScorerLine teamName={homeTeam} scorers={homeScorers} />
+        <ScorerLine teamName={awayTeam} scorers={awayScorers} />
+      </div>
     </div>
   );
 }
 
-function CompactScorerList({
-  teamName,
-  actual,
-  predicted,
-}: {
-  teamName: string;
-  actual: {
-    id: string;
-    label: string;
-    teamName: string;
-  }[];
-  predicted: {
-    id: string;
-    label: string;
-    teamName: string;
-    hit: boolean;
-    points: number;
-  }[];
-}) {
+function ScorerLine({ teamName, scorers }: { teamName: string; scorers: string[] }) {
   return (
-    <div className="min-w-0 space-y-1">
-      <p className="flex min-w-0 items-center gap-2 font-black text-primary">
+    <p className="flex min-w-0 items-start gap-2 text-xs font-bold text-muted-foreground">
+      <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 font-black text-primary">
         <CountryFlag teamName={teamName} />
-        <span className="min-w-0 break-words">{teamName}</span>
-      </p>
-      <p className="break-words text-xs font-bold text-muted-foreground">
-        Real: {actual.length > 0 ? actual.map((scorer) => scorer.label).join(", ") : "sin goles"}
-      </p>
-      <p className="break-words text-xs font-bold text-muted-foreground">
-        Tu prediccion:{" "}
-        {predicted.length > 0
-          ? predicted.map((scorer) => `${scorer.label} +${scorer.points}`).join(", ")
-          : "sin goles"}
-      </p>
-    </div>
+        {teamName}:
+      </span>
+      <span className="min-w-0 break-words">{scorers.length > 0 ? scorers.join(", ") : "sin goles"}</span>
+    </p>
   );
+}
+
+function predictedScorerLabel(scorer: { label: string; points: number }) {
+  return scorer.points > 0 ? `${scorer.label} (+1)` : scorer.label;
 }
 
 function PredictionSummary({
@@ -685,14 +684,6 @@ function buildScorerPointRows(
         points: hit ? 1 : 0,
       };
     });
-}
-
-function scorePointLabel(points: number | null) {
-  if (points === null) return "Marcador pendiente de calcular";
-  if (points === 6) return "Marcador exacto";
-  if (points === 4) return "Diferencia correcta";
-  if (points === 3) return "Resultado correcto";
-  return "Marcador sin acierto";
 }
 
 function TeamName({ name }: { name: string }) {
