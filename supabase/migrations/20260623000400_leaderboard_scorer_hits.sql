@@ -1,4 +1,6 @@
-create or replace function public.get_leaderboard()
+drop function if exists public.get_leaderboard();
+
+create function public.get_leaderboard()
 returns table (
   user_id uuid,
   full_name text,
