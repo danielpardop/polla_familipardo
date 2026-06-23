@@ -269,7 +269,7 @@ alter table public.match_scorers enable row level security;
 
 grant usage on schema public to anon, authenticated;
 grant select, insert, update on public.profiles to authenticated;
-grant select on public.user_roles to authenticated;
+grant select, insert, update, delete on public.user_roles to authenticated;
 grant select, update on public.matches to authenticated;
 grant select on public.players to authenticated;
 grant select, insert, update, delete on public.predictions to authenticated;
@@ -300,6 +300,25 @@ on public.user_roles
 for select
 to authenticated
 using (user_id = auth.uid() or public.has_role(auth.uid(), 'admin'));
+
+create policy "user_roles_insert_admin"
+on public.user_roles
+for insert
+to authenticated
+with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "user_roles_update_admin"
+on public.user_roles
+for update
+to authenticated
+using (public.has_role(auth.uid(), 'admin'))
+with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "user_roles_delete_admin"
+on public.user_roles
+for delete
+to authenticated
+using (public.has_role(auth.uid(), 'admin'));
 
 create policy "matches_select_authenticated"
 on public.matches

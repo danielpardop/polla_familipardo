@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Lock, RefreshCw, RotateCcw, Trophy } from "lucide-react";
+import { ListChecks, Lock, RefreshCw, ShieldCheck, Trophy, UsersRound } from "lucide-react";
 import { toast } from "sonner";
+import { CountryFlag } from "@/components/CountryFlag";
 import { PageHeader } from "@/components/PageHeader";
 import { PlayerCombobox } from "@/components/PlayerCombobox";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api, type Match, type MatchScorerWithPlayer, type Player } from "@/lib/api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { api, type AdminUser, type Match, type MatchScorerWithPlayer, type Player } from "@/lib/api";
 import { formatMatchDate } from "@/lib/date";
 import { formatScore } from "@/lib/utils";
 
@@ -27,9 +30,11 @@ const statusLabels = {
 };
 
 export function Admin() {
+  const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [matchScorers, setMatchScorers] = useState<MatchScorerWithPlayer[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [drafts, setDrafts] = useState<ResultDrafts>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -40,10 +45,16 @@ export function Admin() {
   async function loadData() {
     setLoading(true);
     try {
-      const [matchData, playerData, scorerData] = await Promise.all([api.listMatches(), api.listPlayers(), api.listMatchScorers()]);
+      const [matchData, playerData, scorerData, userData] = await Promise.all([
+        api.listMatches(),
+        api.listPlayers(),
+        api.listMatchScorers(),
+        api.listAdminUsers(),
+      ]);
       setMatches(matchData);
       setPlayers(playerData);
       setMatchScorers(scorerData);
+      setUsers(userData);
       setDrafts(toResultDrafts(matchData, scorerData));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No pudimos cargar admin.");
@@ -57,6 +68,7 @@ export function Admin() {
   }, []);
 
   async function closeMatch(match: Match) {
+    if (match.status === "finished") return;
     setSavingId(match.id);
     try {
       await api.updateMatch(match.id, { status: "closed" });
@@ -70,6 +82,7 @@ export function Admin() {
   }
 
   async function reopenMatch(match: Match) {
+    if (match.status === "finished") return;
     setSavingId(match.id);
     try {
       await api.updateMatch(match.id, { status: "open", home_goals: null, away_goals: null });
@@ -85,6 +98,7 @@ export function Admin() {
 
   async function finishMatch(event: FormEvent<HTMLFormElement>, match: Match) {
     event.preventDefault();
+    if (match.status === "finished") return;
     const draft = drafts[match.id] ?? emptyResultDraft(match);
     const homeGoals = Number(draft.home);
     const awayGoals = Number(draft.away);
@@ -118,6 +132,7 @@ export function Admin() {
   }
 
   function updateScore(match: Match, side: "home" | "away", value: string) {
+    if (match.status === "finished") return;
     const team = side === "home" ? match.home_team : match.away_team;
     const goals = Math.max(0, Number(value) || 0);
     setDrafts((current) => {
@@ -137,6 +152,7 @@ export function Admin() {
   }
 
   function updateScorer(match: Match, teamName: string, slotIndex: number, field: "player_id" | "minute", value: string) {
+    if (match.status === "finished") return;
     setDrafts((current) => {
       const draft = current[match.id] ?? emptyResultDraft(match);
       const next = [...(draft.scorers[teamName] ?? [])];
@@ -152,6 +168,19 @@ export function Admin() {
         },
       };
     });
+  }
+
+  async function setUserAdmin(userId: string, isAdmin: boolean) {
+    setSavingId(userId);
+    try {
+      await api.setAdminRole(userId, isAdmin);
+      toast.success(isAdmin ? "Usuario marcado como admin." : "Usuario marcado como participante.");
+      await loadData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No pudimos actualizar el usuario.");
+    } finally {
+      setSavingId(null);
+    }
   }
 
   return (
@@ -172,86 +201,207 @@ export function Admin() {
           <CardContent className="pt-5 text-sm font-bold text-muted-foreground">Cargando...</CardContent>
         </Card>
       ) : (
-        <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-          {matches.map((match) => (
-            <Card key={match.id} className="min-w-0 overflow-visible">
-              <div className="flag-band h-1" />
-              <CardHeader className="p-4 sm:p-5">
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="min-w-0">
-                    <CardTitle className="break-words text-base sm:text-lg">
-                      {match.home_flag} {match.home_team} vs {match.away_team} {match.away_flag}
-                    </CardTitle>
-                    <CardDescription className="break-words">
-                      {formatMatchDate(match.match_date)} / {match.venue}
-                    </CardDescription>
-                  </div>
-                  <Badge variant={match.status === "open" ? "secondary" : match.status === "finished" ? "accent" : "muted"}>
-                    {statusLabels[match.status]}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 sm:p-5">
-                <div className="break-words rounded-md bg-muted/75 p-3 text-sm font-extrabold">
-                  Resultado actual: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
-                </div>
-
-                <form className="space-y-4" onSubmit={(event) => finishMatch(event, match)}>
-                  <div className="grid min-w-0 gap-3 rounded-lg border bg-white p-3 sm:grid-cols-2">
-                    <ScoreInput match={match} side="home" value={drafts[match.id]?.home ?? ""} onChange={updateScore} />
-                    <ScoreInput match={match} side="away" value={drafts[match.id]?.away ?? ""} onChange={updateScore} />
-                  </div>
-
-                  <div className="grid min-w-0 gap-3 lg:grid-cols-2">
-                    <ScorerInputs
-                      match={match}
-                      teamName={match.home_team}
-                      goals={Number(drafts[match.id]?.home) || 0}
-                      selected={drafts[match.id]?.scorers[match.home_team] ?? []}
-                      players={playersByTeam.get(match.home_team) ?? []}
-                      onChange={updateScorer}
-                    />
-                    <ScorerInputs
-                      match={match}
-                      teamName={match.away_team}
-                      goals={Number(drafts[match.id]?.away) || 0}
-                      selected={drafts[match.id]?.scorers[match.away_team] ?? []}
-                      players={playersByTeam.get(match.away_team) ?? []}
-                      onChange={updateScorer}
-                    />
-                  </div>
-
-                  {scorersByMatch.get(match.id)?.length ? (
-                    <div className="flex flex-wrap gap-2">
-                      {scorersByMatch.get(match.id)?.map((scorer) => (
-                        <Badge key={scorer.id} variant="muted">
-                          {scorer.player?.name ?? "Jugador"} {scorer.minute ? `${scorer.minute}'` : ""} / {scorer.team_name}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div className="grid gap-2 sm:flex sm:flex-wrap">
-                    <Button className="w-full sm:w-auto" variant="outline" type="button" size="sm" onClick={() => closeMatch(match)} disabled={match.status !== "open" || savingId === match.id}>
-                      <Lock className="h-4 w-4" />
-                      Cerrar
-                    </Button>
-                    <Button className="w-full sm:w-auto" variant="secondary" type="button" size="sm" onClick={() => reopenMatch(match)} disabled={savingId === match.id}>
-                      <RotateCcw className="h-4 w-4" />
-                      Abrir
-                    </Button>
-                    <Button className="w-full sm:w-auto" variant="accent" type="submit" size="sm" disabled={savingId === match.id}>
-                      <Trophy className="h-4 w-4" />
-                      Finalizar
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Tabs defaultValue="matches">
+          <TabsList className="grid w-full grid-cols-2 md:w-auto">
+            <TabsTrigger value="matches" className="gap-2">
+              <ListChecks className="h-4 w-4" />
+              Partidos
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-2">
+              <UsersRound className="h-4 w-4" />
+              Usuarios
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="matches">
+            <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+              {matches.map((match) => (
+                <MatchAdminCard
+                  key={match.id}
+                  match={match}
+                  draft={drafts[match.id]}
+                  saving={savingId === match.id}
+                  playersByTeam={playersByTeam}
+                  scorers={scorersByMatch.get(match.id) ?? []}
+                  onClose={closeMatch}
+                  onReopen={reopenMatch}
+                  onFinish={finishMatch}
+                  onScoreChange={updateScore}
+                  onScorerChange={updateScorer}
+                />
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="users">
+            <UsersAdmin users={users} currentUserId={user?.id ?? null} savingId={savingId} onSetAdmin={setUserAdmin} />
+          </TabsContent>
+        </Tabs>
       )}
     </section>
+  );
+}
+
+function MatchAdminCard({
+  match,
+  draft,
+  saving,
+  playersByTeam,
+  scorers,
+  onClose,
+  onReopen,
+  onFinish,
+  onScoreChange,
+  onScorerChange,
+}: {
+  match: Match;
+  draft?: ResultDraft;
+  saving: boolean;
+  playersByTeam: Map<string, Player[]>;
+  scorers: MatchScorerWithPlayer[];
+  onClose: (match: Match) => void;
+  onReopen: (match: Match) => void;
+  onFinish: (event: FormEvent<HTMLFormElement>, match: Match) => void;
+  onScoreChange: (match: Match, side: "home" | "away", value: string) => void;
+  onScorerChange: (match: Match, teamName: string, slotIndex: number, field: "player_id" | "minute", value: string) => void;
+}) {
+  const isFinished = match.status === "finished";
+
+  return (
+    <Card className="min-w-0 overflow-visible">
+      <div className="flag-band h-1" />
+      <CardHeader className="p-4 sm:p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <CardTitle className="flex flex-wrap items-center gap-2 break-words text-base sm:text-lg">
+              <CountryFlag teamName={match.home_team} />
+              <span>{match.home_team}</span>
+              <span className="text-muted-foreground">vs</span>
+              <span>{match.away_team}</span>
+              <CountryFlag teamName={match.away_team} />
+            </CardTitle>
+            <CardDescription className="break-words">
+              {formatMatchDate(match.match_date)} / {match.venue}
+            </CardDescription>
+          </div>
+          <Badge variant={match.status === "open" ? "secondary" : match.status === "finished" ? "accent" : "muted"}>
+            {statusLabels[match.status]}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4 p-4 sm:p-5">
+        <div className="break-words rounded-md bg-muted/75 p-3 text-sm font-extrabold">
+          Resultado actual: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
+        </div>
+
+        {scorers.length ? (
+          <div className="flex flex-wrap gap-2">
+            {scorers.map((scorer) => (
+              <Badge key={scorer.id} variant="muted">
+                {scorer.player?.name ?? "Jugador"} {scorer.minute ? `${scorer.minute}'` : ""} / {scorer.team_name}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+
+        {isFinished ? (
+          <div className="rounded-md border bg-white p-3 text-sm font-bold text-muted-foreground">
+            Partido finalizado. Bloqueado en modo solo lectura.
+          </div>
+        ) : (
+          <form className="space-y-4" onSubmit={(event) => onFinish(event, match)}>
+            <div className="grid min-w-0 gap-3 rounded-lg border bg-white p-3 sm:grid-cols-2">
+              <ScoreInput match={match} side="home" value={draft?.home ?? ""} onChange={onScoreChange} />
+              <ScoreInput match={match} side="away" value={draft?.away ?? ""} onChange={onScoreChange} />
+            </div>
+
+            <div className="grid min-w-0 gap-3 lg:grid-cols-2">
+              <ScorerInputs
+                match={match}
+                teamName={match.home_team}
+                goals={Number(draft?.home) || 0}
+                selected={draft?.scorers[match.home_team] ?? []}
+                players={playersByTeam.get(match.home_team) ?? []}
+                onChange={onScorerChange}
+              />
+              <ScorerInputs
+                match={match}
+                teamName={match.away_team}
+                goals={Number(draft?.away) || 0}
+                selected={draft?.scorers[match.away_team] ?? []}
+                players={playersByTeam.get(match.away_team) ?? []}
+                onChange={onScorerChange}
+              />
+            </div>
+
+            <div className="grid gap-2 sm:flex sm:flex-wrap">
+              <Button className="w-full sm:w-auto" variant="outline" type="button" size="sm" onClick={() => onClose(match)} disabled={match.status !== "open" || saving}>
+                <Lock className="h-4 w-4" />
+                Cerrar
+              </Button>
+              <Button className="w-full sm:w-auto" variant="secondary" type="button" size="sm" onClick={() => onReopen(match)} disabled={saving}>
+                Abrir
+              </Button>
+              <Button className="w-full sm:w-auto" variant="accent" type="submit" size="sm" disabled={saving}>
+                <Trophy className="h-4 w-4" />
+                Finalizar
+              </Button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function UsersAdmin({
+  users,
+  currentUserId,
+  savingId,
+  onSetAdmin,
+}: {
+  users: AdminUser[];
+  currentUserId: string | null;
+  savingId: string | null;
+  onSetAdmin: (userId: string, isAdmin: boolean) => void;
+}) {
+  if (users.length === 0) {
+    return (
+      <Card>
+        <CardContent className="pt-5 text-sm font-bold text-muted-foreground">Aun no hay usuarios registrados.</CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="flag-band h-1" />
+      <CardHeader className="p-4 sm:p-5">
+        <CardTitle>Usuarios</CardTitle>
+        <CardDescription>Gestiona participantes registrados y permisos de admin.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3 p-4 sm:p-5">
+        {users.map((item) => (
+          <div key={item.id} className="grid gap-3 rounded-md border bg-white p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <div className="min-w-0">
+              <p className="break-words text-sm font-black text-primary">{item.full_name || "Sin nombre"}</p>
+              <p className="break-words text-xs font-bold text-muted-foreground">{item.email}</p>
+            </div>
+            <div className="grid gap-2 sm:flex sm:items-center">
+              <Badge variant={item.is_admin ? "accent" : "secondary"}>{item.is_admin ? "Admin" : "Participante"}</Badge>
+              <Button
+                variant={item.is_admin ? "outline" : "secondary"}
+                size="sm"
+                className="w-full sm:w-auto"
+                disabled={savingId === item.id || item.id === currentUserId}
+                onClick={() => onSetAdmin(item.id, !item.is_admin)}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {item.is_admin ? "Quitar admin" : "Hacer admin"}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 

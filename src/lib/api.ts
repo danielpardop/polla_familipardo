@@ -16,6 +16,10 @@ export type AppUser = {
   email: string;
 };
 
+export type AdminUser = Profile & {
+  is_admin: boolean;
+};
+
 export type PredictionWithScorers = Prediction & {
   scorers: PredictionScorer[];
 };
@@ -225,6 +229,37 @@ export const api = {
     const { data, error } = await supabase.rpc("get_leaderboard");
     if (error) throw new Error(error.message);
     return data ?? [];
+  },
+
+  async listAdminUsers() {
+    const [{ data: profiles, error: profilesError }, { data: roles, error: rolesError }] = await Promise.all([
+      supabase.from("profiles").select("*").order("created_at", { ascending: true }),
+      supabase.from("user_roles").select("*"),
+    ]);
+
+    if (profilesError) throw new Error(profilesError.message);
+    if (rolesError) throw new Error(rolesError.message);
+
+    const adminIds = new Set((roles ?? []).filter((role) => role.role === "admin").map((role) => role.user_id));
+    return (profiles ?? []).map((profile) => ({
+      ...profile,
+      is_admin: adminIds.has(profile.id) || profile.role === "admin",
+    }));
+  },
+
+  async setAdminRole(userId: string, isAdmin: boolean) {
+    if (isAdmin) {
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
+      if (roleError) throw new Error(roleError.message);
+    } else {
+      const { error: deleteError } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
+      if (deleteError) throw new Error(deleteError.message);
+    }
+
+    const { error: profileError } = await supabase.from("profiles").update({ role: isAdmin ? "admin" : "user" }).eq("id", userId);
+    if (profileError) throw new Error(profileError.message);
   },
 
   async updateMatch(matchId: string, input: MatchUpdate) {

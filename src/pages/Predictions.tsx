@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarClock, Check, Flag, Lock, RefreshCw, Save, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { CountryFlag } from "@/components/CountryFlag";
 import { PageHeader } from "@/components/PageHeader";
 import { PlayerCombobox, playerLabel } from "@/components/PlayerCombobox";
 import { Badge } from "@/components/ui/badge";
@@ -331,9 +332,9 @@ function PredictionCard({
           <Badge variant={predictionStatusVariant(match, canPredict)}>{predictionStatusLabel(match, canPredict)}</Badge>
         </div>
         <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-xl sm:gap-3 sm:text-2xl md:text-3xl">
-          <TeamName name={match.home_team} flag={match.home_flag} />
+          <TeamName name={match.home_team} />
           <span className="text-muted-foreground">vs</span>
-          <TeamName name={match.away_team} flag={match.away_flag} />
+          <TeamName name={match.away_team} />
         </CardTitle>
         <CardDescription className="flex min-w-0 items-start gap-2 text-sm font-extrabold">
           <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
@@ -343,43 +344,52 @@ function PredictionCard({
       <CardContent className="space-y-4 p-4 sm:p-5">
         {match.status === "finished" ? (
           <div className="break-words rounded-md bg-muted p-3 text-sm font-extrabold">
-            Resultado final: {match.home_flag} {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}{" "}
-            {match.away_flag}
+            Resultado final: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
           </div>
         ) : null}
 
         {matchScorers.length > 0 ? <ActualScorers scorers={matchScorers} /> : null}
 
-        <form className="space-y-4" onSubmit={onSave}>
-          <ScoreFields match={match} draft={draft} disabled={!canPredict} onScoreChange={onScoreChange} />
-          <div className="grid min-w-0 gap-3 lg:grid-cols-2">
-            <ScorerSelects
-              match={match}
-              teamName={match.home_team}
-              goals={Number(draft.home) || 0}
-              selectedIds={draft.scorers[match.home_team] ?? []}
-              players={playersByTeam.get(match.home_team) ?? []}
-              disabled={!canPredict}
-              onChange={onScorerChange}
-            />
-            <ScorerSelects
-              match={match}
-              teamName={match.away_team}
-              goals={Number(draft.away) || 0}
-              selectedIds={draft.scorers[match.away_team] ?? []}
-              players={playersByTeam.get(match.away_team) ?? []}
-              disabled={!canPredict}
-              onChange={onScorerChange}
-            />
+        {canPredict ? (
+          <form className="space-y-4" onSubmit={onSave}>
+            <ScoreFields match={match} draft={draft} disabled={false} onScoreChange={onScoreChange} />
+            <div className="grid min-w-0 gap-3 lg:grid-cols-2">
+              <ScorerSelects
+                match={match}
+                teamName={match.home_team}
+                goals={Number(draft.home) || 0}
+                selectedIds={draft.scorers[match.home_team] ?? []}
+                players={playersByTeam.get(match.home_team) ?? []}
+                onChange={onScorerChange}
+              />
+              <ScorerSelects
+                match={match}
+                teamName={match.away_team}
+                goals={Number(draft.away) || 0}
+                selectedIds={draft.scorers[match.away_team] ?? []}
+                players={playersByTeam.get(match.away_team) ?? []}
+                onChange={onScorerChange}
+              />
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <PredictionSummary prediction={prediction} match={match} playersByTeam={playersByTeam} canPredict={canPredict} />
+              <Button type="submit" size="sm" className="w-full sm:w-auto" disabled={saving}>
+                <Save className="h-4 w-4" />
+                Guardar
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="rounded-md border bg-white p-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <PredictionSummary prediction={prediction} match={match} playersByTeam={playersByTeam} canPredict={canPredict} />
+              <Badge variant="muted">
+                <Lock className="mr-1 h-3.5 w-3.5" />
+                Solo lectura
+              </Badge>
+            </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <PredictionSummary prediction={prediction} match={match} playersByTeam={playersByTeam} canPredict={canPredict} />
-            <Button type="submit" size="sm" className="w-full sm:w-auto" disabled={!canPredict || saving}>
-              {canPredict ? <Save className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-              {canPredict ? "Guardar" : "Bloqueado"}
-            </Button>
-          </div>
-        </form>
+        )}
       </CardContent>
     </Card>
   );
@@ -439,7 +449,6 @@ function ScorerSelects({
   goals,
   selectedIds,
   players,
-  disabled,
   onChange,
 }: {
   match: Match;
@@ -447,7 +456,6 @@ function ScorerSelects({
   goals: number;
   selectedIds: string[];
   players: Player[];
-  disabled: boolean;
   onChange: (teamName: string, slotIndex: number, playerId: string) => void;
 }) {
   if (goals <= 0) {
@@ -470,7 +478,6 @@ function ScorerSelects({
             id={`${match.id}-${teamName}-${index}`}
             players={players}
             value={selectedIds[index] ?? ""}
-            disabled={disabled}
             placeholder="Buscar jugador"
             onChange={(playerId) => onChange(teamName, index, playerId)}
           />
@@ -531,10 +538,10 @@ function PredictionSummary({
   );
 }
 
-function TeamName({ name, flag }: { name: string; flag: string }) {
+function TeamName({ name }: { name: string }) {
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
-      <span className="shrink-0 rounded bg-white px-1.5 py-0.5 text-base shadow-sm">{flag}</span>
+      <CountryFlag teamName={name} />
       <span className="min-w-0 break-words">{name}</span>
     </span>
   );
