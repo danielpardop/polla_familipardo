@@ -21,7 +21,7 @@ export type PredictionWithScorers = Prediction & {
 };
 
 export type MatchScorerWithPlayer = MatchScorer & {
-  player?: Pick<Player, "id" | "name" | "team_name"> | null;
+  player?: Pick<Player, "id" | "name" | "team_name" | "position"> | null;
 };
 
 export type AuthPayload = {
@@ -141,7 +141,7 @@ export const api = {
   async listMatchScorers() {
     const { data, error } = await supabase
       .from("match_scorers")
-      .select("*, player:players(id,name,team_name)")
+      .select("*, player:players(id,name,team_name,position)")
       .order("minute", { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as MatchScorerWithPlayer[];

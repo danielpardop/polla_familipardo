@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Lock, RefreshCw, RotateCcw, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
+import { PlayerCombobox } from "@/components/PlayerCombobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -173,7 +174,7 @@ export function Admin() {
       ) : (
         <div className="grid min-w-0 gap-4 xl:grid-cols-2">
           {matches.map((match) => (
-            <Card key={match.id} className="min-w-0 overflow-hidden">
+            <Card key={match.id} className="min-w-0 overflow-visible">
               <div className="flag-band h-1" />
               <CardHeader className="p-4 sm:p-5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -307,19 +308,13 @@ function ScorerInputs({
       <p className="break-words text-sm font-black text-primary">{teamName}: goleadores reales</p>
       {Array.from({ length: goals }, (_, index) => (
         <div key={`${match.id}-${teamName}-${index}`} className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_90px]">
-          <select
-            className="flex h-10 w-full min-w-0 rounded-md border border-input bg-white px-3 py-2 text-sm font-extrabold shadow-sm"
+          <PlayerCombobox
+            id={`${match.id}-${teamName}-${index}-admin`}
+            players={players}
             value={selected[index]?.player_id ?? ""}
-            onChange={(event) => onChange(match, teamName, index, "player_id", event.target.value)}
-            required
-          >
-            <option value="">Gol {index + 1}: jugador</option>
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {player.name}
-              </option>
-            ))}
-          </select>
+            placeholder={`Gol ${index + 1}: jugador`}
+            onChange={(playerId) => onChange(match, teamName, index, "player_id", playerId)}
+          />
           <Input
             type="number"
             min={1}

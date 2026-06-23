@@ -102,6 +102,7 @@ export type Database = {
           id: string;
           team_name: string;
           name: string;
+          position: string;
           active: boolean;
           display_order: number;
           created_at: string;
@@ -110,6 +111,7 @@ export type Database = {
           id?: string;
           team_name: string;
           name: string;
+          position?: string;
           active?: boolean;
           display_order?: number;
           created_at?: string;
@@ -118,6 +120,7 @@ export type Database = {
           id?: string;
           team_name?: string;
           name?: string;
+          position?: string;
           active?: boolean;
           display_order?: number;
           created_at?: string;

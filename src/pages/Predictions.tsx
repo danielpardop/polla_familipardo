@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarClock, Check, Flag, Lock, RefreshCw, Save, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
+import { PlayerCombobox, playerLabel } from "@/components/PlayerCombobox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -322,7 +323,7 @@ function PredictionCard({
   const canPredict = isPredictionOpen(match, nowMs);
 
   return (
-    <Card className={cn("min-w-0 overflow-hidden", canPredict ? "border-2 border-secondary" : "")}>
+    <Card className={cn("min-w-0 overflow-visible", canPredict ? "border-2 border-secondary" : "")}>
       <div className="flag-band h-2" />
       <CardHeader className="bg-secondary/10 p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -465,21 +466,14 @@ function ScorerSelects({
           <Label htmlFor={`${match.id}-${teamName}-${index}`} className="text-xs">
             Gol {index + 1}
           </Label>
-          <select
+          <PlayerCombobox
             id={`${match.id}-${teamName}-${index}`}
-            className="flex h-10 w-full min-w-0 rounded-md border border-input bg-white px-3 py-2 text-sm font-extrabold shadow-sm"
+            players={players}
             value={selectedIds[index] ?? ""}
-            onChange={(event) => onChange(teamName, index, event.target.value)}
             disabled={disabled}
-            required
-          >
-            <option value="">Selecciona jugador</option>
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {player.name}
-              </option>
-            ))}
-          </select>
+            placeholder="Buscar jugador"
+            onChange={(playerId) => onChange(teamName, index, playerId)}
+          />
         </div>
       ))}
     </div>
@@ -519,11 +513,11 @@ function PredictionSummary({
     return <div className="text-sm font-bold text-muted-foreground">{canPredict ? "Sin prediccion" : "Apuesta no realizada / 0 pts"}</div>;
   }
 
-  const playersById = new Map(Array.from(playersByTeam.values()).flat().map((player) => [player.id, player.name]));
+  const playersById = new Map(Array.from(playersByTeam.values()).flat().map((player) => [player.id, playerLabel(player)]));
   const scorerNames = prediction.scorers
     .slice()
     .sort((a, b) => a.slot_number - b.slot_number)
-    .map((scorer) => `${playersById.get(scorer.player_id) ?? "Jugador"} (${scorer.team_name})`);
+    .map((scorer) => `${playersById.get(scorer.player_id) ?? "Jugador"} / ${scorer.team_name}`);
 
   return (
     <div className="min-w-0 space-y-1 text-sm font-bold text-muted-foreground">
