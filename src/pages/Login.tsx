@@ -86,31 +86,47 @@ export function Login() {
             <ScoreRule value="+1" label="Por goleador" />
           </div>
         </section>
-        <section className="relative hidden min-h-[620px] overflow-hidden bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
-          <div className="absolute inset-x-0 top-0 h-3 flag-band" />
-          <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "linear-gradient(135deg, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-          <div>
-            <div className="relative grid h-14 w-14 place-items-center rounded-lg bg-secondary text-primary shadow-sm ring-1 ring-white/20">
-              <Trophy className="h-8 w-8" />
-            </div>
-            <h1 className="relative mt-8 max-w-md text-5xl font-black leading-none">Polla Familia Pardo</h1>
-            <p className="relative mt-4 max-w-sm text-base font-bold leading-relaxed text-white/78">
-              Una dinamica familiar para seguir a Colombia: predice marcadores, escoge goleadores y suma puntos con cada acierto.
-            </p>
-            <div className="relative mt-8 grid gap-3 text-sm font-bold text-white/82">
-              <LoginNote icon={<Flag className="h-4 w-4" />} text="Solo jugamos con los partidos de Colombia." />
-              <LoginNote icon={<ListChecks className="h-4 w-4" />} text="Tus predicciones quedan bloqueadas cuando empieza el partido." />
-              <LoginNote icon={<Users className="h-4 w-4" />} text="La tabla muestra total, puntos por marcador y goleadores acertados." />
-            </div>
-          </div>
-          <div className="relative grid grid-cols-4 gap-3">
-            <ScoreRule value="6" label="Exacto" />
-            <ScoreRule value="4" label="Diferencia / empate" />
-            <ScoreRule value="3" label="Ganador" />
-            <ScoreRule value="+1" label="Goleador" />
-          </div>
-        </section>
+<section className="relative hidden min-h-[680px] overflow-hidden bg-primary p-8 text-primary-foreground lg:flex lg:flex-col">
+  <div className="absolute inset-x-0 top-0 h-3 flag-band" />
+  <div
+    className="absolute inset-0 opacity-[0.08]"
+    style={{
+      backgroundImage: "linear-gradient(135deg, white 1px, transparent 1px)",
+      backgroundSize: "28px 28px",
+    }}
+  />
 
+  <div className="relative z-10 flex flex-1 flex-col">
+    <div className="shrink-0">
+      <div className="grid h-14 w-14 place-items-center rounded-lg bg-secondary text-primary shadow-sm ring-1 ring-white/20">
+        <Trophy className="h-8 w-8" />
+      </div>
+
+      <h1 className="mt-8 max-w-md text-5xl font-black leading-none">
+        Polla Familia Pardo
+      </h1>
+
+      <p className="mt-4 max-w-sm text-base font-bold leading-relaxed text-white/78">
+        Una dinamica familiar para seguir a Colombia: predice marcadores, escoge goleadores y suma puntos con cada acierto.
+      </p>
+
+      <div className="mt-8 grid gap-3 text-sm font-bold text-white/82">
+        <LoginNote icon={<Flag className="h-4 w-4" />} text="Solo jugamos con los partidos de Colombia." />
+        <LoginNote icon={<ListChecks className="h-4 w-4" />} text="Tus predicciones quedan bloqueadas cuando empieza el partido." />
+        <LoginNote icon={<Users className="h-4 w-4" />} text="La tabla muestra total, puntos por marcador y goleadores acertados." />
+      </div>
+    </div>
+
+    <div className="mt-auto shrink-0 pt-10">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <ScoreRule value="6" label="Exacto" />
+        <ScoreRule value="4" label="Diferencia / empate" />
+        <ScoreRule value="3" label="Ganador" />
+        <ScoreRule value="+1" label="Goleador" />
+      </div>
+    </div>
+  </div>
+</section>
         <Card className="rounded-none border-0 bg-white shadow-none">
           <CardHeader className="p-5 pb-3 sm:p-6 sm:pb-4">
             <CardTitle className="flex items-center gap-2 text-xl">
@@ -208,9 +224,13 @@ export function Login() {
 
 function ScoreRule({ value, label }: { value: string; label: string }) {
   return (
-    <div className="min-w-0 rounded-md bg-white/10 p-3 sm:p-4">
-      <p className="text-xl font-black text-secondary sm:text-2xl">{value}</p>
-      <p className="truncate text-[11px] font-extrabold text-white/75 sm:text-xs">{label}</p>
+    <div className="flex min-h-[86px] min-w-0 flex-col justify-center rounded-md bg-white/10 p-3 sm:p-4">
+      <p className="text-xl font-black leading-none text-secondary sm:text-2xl">
+        {value}
+      </p>
+      <p className="mt-2 text-[11px] font-extrabold leading-tight text-white/75 sm:text-xs">
+        {label}
+      </p>
     </div>
   );
 }
