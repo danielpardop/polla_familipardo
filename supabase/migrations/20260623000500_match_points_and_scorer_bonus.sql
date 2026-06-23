@@ -28,7 +28,6 @@ begin
   update public.predictions
   set points = case
     when home_goals = actual_home and away_goals = actual_away then 6
-    when actual_home = actual_away and home_goals = away_goals then 2
     when sign(home_goals - away_goals) = sign(actual_home - actual_away)
       and (home_goals - away_goals) = (actual_home - actual_away) then 4
     when sign(home_goals - away_goals) = sign(actual_home - actual_away) then 3
@@ -41,7 +40,6 @@ $$;
 update public.predictions
 set points = case
   when predictions.home_goals = matches.home_goals and predictions.away_goals = matches.away_goals then 6
-  when matches.home_goals = matches.away_goals and predictions.home_goals = predictions.away_goals then 2
   when sign(predictions.home_goals - predictions.away_goals) = sign(matches.home_goals - matches.away_goals)
     and (predictions.home_goals - predictions.away_goals) = (matches.home_goals - matches.away_goals) then 4
   when sign(predictions.home_goals - predictions.away_goals) = sign(matches.home_goals - matches.away_goals) then 3
@@ -54,7 +52,7 @@ where predictions.match_id = matches.id
   and matches.away_goals is not null;
 
 alter table public.predictions
-  add constraint predictions_valid_points check (points is null or points in (0, 2, 3, 4, 6));
+  add constraint predictions_valid_points check (points is null or points in (0, 3, 4, 6));
 
 drop function if exists public.get_leaderboard();
 

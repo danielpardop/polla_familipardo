@@ -47,11 +47,14 @@ export function Leaderboard() {
           </div>
           <div className="space-y-1">
             <p className="font-black text-primary">Hola familia, estas son las reglas para ganar puntos</p>
-            <p>
-              Marcador exacto: 6 pts. Ganador y diferencia de goles correcta: 4 pts. Solo ganador: 3 pts.
-              Si el partido queda empatado y tambien predijiste empate, pero no el marcador exacto, sumas 2 pts.
-              Cada goleador acertado suma 1 punto extra.
-            </p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>Marcador exacto: 6 puntos.</li>
+              <li>Ganador y diferencia de goles correcta: 4 puntos.</li>
+              <li>Si el partido queda empatado, acertar el empate cuenta como diferencia correcta: 4 puntos.</li>
+              <li>Solo ganador, sin marcador exacto ni diferencia correcta: 3 puntos.</li>
+              <li>Si no aciertas el resultado: 0 puntos.</li>
+              <li>Cada jugador que marques como goleador y si haga gol suma 1 punto extra.</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

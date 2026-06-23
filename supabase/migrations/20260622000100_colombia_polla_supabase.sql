@@ -98,7 +98,7 @@ create table public.predictions (
   updated_at timestamptz not null default now(),
   unique (user_id, match_id),
   constraint predictions_non_negative_scores check (home_goals >= 0 and away_goals >= 0),
-  constraint predictions_valid_points check (points is null or points in (0, 2, 3, 4, 6))
+  constraint predictions_valid_points check (points is null or points in (0, 3, 4, 6))
 );
 
 create table public.prediction_scorers (
@@ -211,7 +211,6 @@ begin
   update public.predictions
   set points = case
     when home_goals = actual_home and away_goals = actual_away then 6
-    when actual_home = actual_away and home_goals = away_goals then 2
     when sign(home_goals - away_goals) = sign(actual_home - actual_away)
       and (home_goals - away_goals) = (actual_home - actual_away) then 4
     when sign(home_goals - away_goals) = sign(actual_home - actual_away) then 3
