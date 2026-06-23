@@ -98,7 +98,7 @@ create table public.predictions (
   updated_at timestamptz not null default now(),
   unique (user_id, match_id),
   constraint predictions_non_negative_scores check (home_goals >= 0 and away_goals >= 0),
-  constraint predictions_valid_points check (points is null or points in (0, 1, 2, 3))
+  constraint predictions_valid_points check (points is null or points in (0, 2, 3, 4, 6))
 );
 
 create table public.prediction_scorers (
@@ -210,9 +210,11 @@ begin
 
   update public.predictions
   set points = case
-    when home_goals = actual_home and away_goals = actual_away then 3
-    when (home_goals - away_goals) = (actual_home - actual_away) then 2
-    when sign(home_goals - away_goals) = sign(actual_home - actual_away) then 1
+    when home_goals = actual_home and away_goals = actual_away then 6
+    when actual_home = actual_away and home_goals = away_goals then 2
+    when sign(home_goals - away_goals) = sign(actual_home - actual_away)
+      and (home_goals - away_goals) = (actual_home - actual_away) then 4
+    when sign(home_goals - away_goals) = sign(actual_home - actual_away) then 3
     else 0
   end
   where match_id = p_match_id;
@@ -223,11 +225,12 @@ create or replace function public.get_leaderboard()
 returns table (
   user_id uuid,
   full_name text,
+  score_points integer,
+  scorer_hits integer,
   total_points integer,
   exact_scores integer,
   goal_differences integer,
   outcomes integer,
-  scorer_hits integer,
   predictions_count integer
 )
 language sql
@@ -261,28 +264,41 @@ as $$
     ) actual on actual.match_id = predicted.match_id
       and actual.player_id = predicted.player_id
     group by predicted.user_id
+  ),
+  user_scores as (
+    select
+      profiles.id as user_id,
+      coalesce(profiles.full_name, profiles.email) as full_name,
+      coalesce(sum(predictions.points), 0)::integer as score_points,
+      count(*) filter (where predictions.points = 6)::integer as exact_scores,
+      count(*) filter (where predictions.points = 4)::integer as goal_differences,
+      count(*) filter (where predictions.points in (2, 3))::integer as outcomes,
+      count(predictions.id)::integer as predictions_count,
+      coalesce(scorer_hits.scorer_hits, 0)::integer as scorer_hits
+    from public.profiles
+    left join public.predictions on predictions.user_id = profiles.id
+    left join scorer_hits on scorer_hits.user_id = profiles.id
+    where auth.role() = 'authenticated'
+      and profiles.deleted_at is null
+      and not exists (
+        select 1
+        from public.user_roles
+        where user_roles.user_id = profiles.id
+          and user_roles.role = 'admin'
+      )
+    group by profiles.id, profiles.full_name, profiles.email, scorer_hits.scorer_hits
   )
   select
-    profiles.id as user_id,
-    coalesce(profiles.full_name, profiles.email) as full_name,
-    coalesce(sum(predictions.points), 0)::integer as total_points,
-    count(*) filter (where predictions.points = 3)::integer as exact_scores,
-    count(*) filter (where predictions.points = 2)::integer as goal_differences,
-    count(*) filter (where predictions.points = 1)::integer as outcomes,
-    coalesce(scorer_hits.scorer_hits, 0)::integer as scorer_hits,
-    count(predictions.id)::integer as predictions_count
-  from public.profiles
-  left join public.predictions on predictions.user_id = profiles.id
-  left join scorer_hits on scorer_hits.user_id = profiles.id
-  where auth.role() = 'authenticated'
-    and profiles.deleted_at is null
-    and not exists (
-      select 1
-      from public.user_roles
-      where user_roles.user_id = profiles.id
-        and user_roles.role = 'admin'
-    )
-  group by profiles.id, profiles.full_name, profiles.email, scorer_hits.scorer_hits
+    user_id,
+    full_name,
+    score_points,
+    scorer_hits,
+    (score_points + scorer_hits)::integer as total_points,
+    exact_scores,
+    goal_differences,
+    outcomes,
+    predictions_count
+  from user_scores
   order by total_points desc, exact_scores desc, goal_differences desc, outcomes desc, scorer_hits desc, full_name asc;
 $$;
 

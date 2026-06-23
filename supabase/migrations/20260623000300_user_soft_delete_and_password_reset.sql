@@ -1,7 +1,9 @@
 alter table public.profiles
-add column if not exists deleted_at timestamptz;
+  add column if not exists deleted_at timestamptz;
 
-create or replace function public.get_leaderboard()
+drop function if exists public.get_leaderboard();
+
+create function public.get_leaderboard()
 returns table (
   user_id uuid,
   full_name text,

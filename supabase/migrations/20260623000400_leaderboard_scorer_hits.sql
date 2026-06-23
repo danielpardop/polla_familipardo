@@ -46,10 +46,10 @@ as $$
   select
     profiles.id as user_id,
     coalesce(profiles.full_name, profiles.email) as full_name,
-    coalesce(sum(predictions.points), 0)::integer as total_points,
-    count(*) filter (where predictions.points = 3)::integer as exact_scores,
-    count(*) filter (where predictions.points = 2)::integer as goal_differences,
-    count(*) filter (where predictions.points = 1)::integer as outcomes,
+    (coalesce(sum(predictions.points), 0) + coalesce(scorer_hits.scorer_hits, 0))::integer as total_points,
+    count(*) filter (where predictions.points = 6)::integer as exact_scores,
+    count(*) filter (where predictions.points = 4)::integer as goal_differences,
+    count(*) filter (where predictions.points in (2, 3))::integer as outcomes,
     coalesce(scorer_hits.scorer_hits, 0)::integer as scorer_hits,
     count(predictions.id)::integer as predictions_count
   from public.profiles

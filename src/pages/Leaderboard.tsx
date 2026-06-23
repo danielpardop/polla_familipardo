@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Medal, RefreshCw, Sparkles } from "lucide-react";
+import { Flag, Medal, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,7 @@ export function Leaderboard() {
     <section className="space-y-5">
       <PageHeader
         title="Tabla de posiciones"
-        description="La carrera amistosa de la Familia Pardo por el marcador perfecto."
+        description="La carrera amistosa de la Familia Pardo por el marcador perfecto y los goleadores bien elegidos."
         action={
           <Button variant="outline" size="sm" onClick={loadLeaderboard} disabled={loading}>
             <RefreshCw className="h-4 w-4" />
@@ -46,10 +46,11 @@ export function Leaderboard() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="space-y-1">
-            <p className="font-black text-primary">Como se suman los puntos</p>
+            <p className="font-black text-primary">Hola familia, estas son las reglas para ganar puntos</p>
             <p>
-              Marcador exacto suma 3 puntos, acertar la diferencia de goles suma 2 y acertar ganador o empate suma 1.
-              Los goleadores acertados aparecen aparte para que la familia pueda presumir esos aciertos finos.
+              Marcador exacto: 6 pts. Ganador y diferencia de goles correcta: 4 pts. Solo ganador: 3 pts.
+              Si el partido queda empatado y tambien predijiste empate, pero no el marcador exacto, sumas 2 pts.
+              Cada goleador acertado suma 1 punto extra.
             </p>
           </div>
         </CardContent>
@@ -77,26 +78,28 @@ export function Leaderboard() {
                       <Badge variant="secondary">{row.total_points} pts</Badge>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold text-muted-foreground">
+                      <MobileMetric label="Marcador" value={row.score_points} />
+                      <MobileMetric label="Goleadores +1" value={row.scorer_hits} />
                       <MobileMetric label="Exactos" value={row.exact_scores} />
                       <MobileMetric label="Diferencia" value={row.goal_differences} />
                       <MobileMetric label="Resultado" value={row.outcomes} />
-                      <MobileMetric label="Goleadores" value={row.scorer_hits} />
                       <MobileMetric label="Predicciones" value={row.predictions_count} />
                     </div>
                   </div>
                 ))}
               </div>
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[760px] text-left">
+                <table className="w-full min-w-[900px] text-left">
                 <thead className="bg-primary text-xs font-black uppercase text-primary-foreground">
                   <tr>
                     <th className="px-4 py-3">#</th>
                     <th className="px-4 py-3">Participante</th>
-                    <th className="px-4 py-3">Puntos</th>
+                    <th className="px-4 py-3">Total</th>
+                    <th className="px-4 py-3">Marcador</th>
+                    <th className="px-4 py-3">Goleadores +1</th>
                     <th className="px-4 py-3">Exactos</th>
                     <th className="px-4 py-3">Diferencia</th>
                     <th className="px-4 py-3">Resultado</th>
-                    <th className="px-4 py-3">Goleadores</th>
                     <th className="px-4 py-3">Predicciones</th>
                   </tr>
                 </thead>
@@ -113,10 +116,16 @@ export function Leaderboard() {
                       <td className="px-4 py-3">
                         <Badge variant="secondary">{row.total_points} pts</Badge>
                       </td>
+                      <td className="px-4 py-3 font-bold">{row.score_points}</td>
+                      <td className="px-4 py-3 font-bold">
+                        <span className="inline-flex items-center gap-1">
+                          <Flag className="h-4 w-4 text-secondary" />
+                          {row.scorer_hits}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 font-bold">{row.exact_scores}</td>
                       <td className="px-4 py-3 font-bold">{row.goal_differences}</td>
                       <td className="px-4 py-3 font-bold">{row.outcomes}</td>
-                      <td className="px-4 py-3 font-bold">{row.scorer_hits}</td>
                       <td className="px-4 py-3 font-bold">{row.predictions_count}</td>
                     </tr>
                   ))}

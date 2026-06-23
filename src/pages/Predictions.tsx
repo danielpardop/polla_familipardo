@@ -50,9 +50,9 @@ export function Predictions() {
     () => ({
       pending: futureMatches.length,
       saved: predictions.length,
-      points: predictions.reduce((sum, prediction) => sum + (prediction.points ?? 0), 0),
+      points: calculatePredictionPoints(predictions, matchScorers),
     }),
-    [futureMatches.length, predictions],
+    [futureMatches.length, matchScorers, predictions],
   );
 
   async function loadData() {
@@ -634,4 +634,27 @@ function groupMatchScorersByMatch(scorers: MatchScorerWithPlayer[]) {
     map.set(scorer.match_id, [...(map.get(scorer.match_id) ?? []), scorer]);
   }
   return map;
+}
+
+function calculatePredictionPoints(predictions: PredictionWithScorers[], matchScorers: MatchScorerWithPlayer[]) {
+  const actualCounts = new Map<string, number>();
+  for (const scorer of matchScorers) {
+    const key = `${scorer.match_id}:${scorer.player_id}`;
+    actualCounts.set(key, (actualCounts.get(key) ?? 0) + 1);
+  }
+
+  return predictions.reduce((sum, prediction) => {
+    const predictedCounts = new Map<string, number>();
+    for (const scorer of prediction.scorers) {
+      const key = `${prediction.match_id}:${scorer.player_id}`;
+      predictedCounts.set(key, (predictedCounts.get(key) ?? 0) + 1);
+    }
+
+    let scorerHits = 0;
+    for (const [key, predictedCount] of predictedCounts) {
+      scorerHits += Math.min(predictedCount, actualCounts.get(key) ?? 0);
+    }
+
+    return sum + (prediction.points ?? 0) + scorerHits;
+  }, 0);
 }

@@ -283,11 +283,12 @@ export type Database = {
         Returns: {
           user_id: string;
           full_name: string;
+          score_points: number;
+          scorer_hits: number;
           total_points: number;
           exact_scores: number;
           goal_differences: number;
           outcomes: number;
-          scorer_hits: number;
           predictions_count: number;
         }[];
       };
