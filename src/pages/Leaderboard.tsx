@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Medal, RefreshCw } from "lucide-react";
+import { Medal, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,7 @@ export function Leaderboard() {
     <section className="space-y-5">
       <PageHeader
         title="Tabla de posiciones"
-        description="Ranking actualizado desde las predicciones calculadas."
+        description="La carrera amistosa de la Familia Pardo por el marcador perfecto."
         action={
           <Button variant="outline" size="sm" onClick={loadLeaderboard} disabled={loading}>
             <RefreshCw className="h-4 w-4" />
@@ -38,6 +38,22 @@ export function Leaderboard() {
           </Button>
         }
       />
+
+      <Card className="overflow-hidden">
+        <div className="flag-band h-1" />
+        <CardContent className="grid gap-3 p-4 text-sm font-bold text-muted-foreground sm:grid-cols-[auto_1fr] sm:p-5">
+          <div className="grid h-10 w-10 place-items-center rounded-md bg-secondary text-primary">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="space-y-1">
+            <p className="font-black text-primary">Como se suman los puntos</p>
+            <p>
+              Marcador exacto suma 3 puntos, acertar la diferencia de goles suma 2 y acertar ganador o empate suma 1.
+              Los goleadores acertados aparecen aparte para que la familia pueda presumir esos aciertos finos.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="overflow-hidden">
         <CardContent className="p-0">
@@ -64,13 +80,14 @@ export function Leaderboard() {
                       <MobileMetric label="Exactos" value={row.exact_scores} />
                       <MobileMetric label="Diferencia" value={row.goal_differences} />
                       <MobileMetric label="Resultado" value={row.outcomes} />
+                      <MobileMetric label="Goleadores" value={row.scorer_hits} />
                       <MobileMetric label="Predicciones" value={row.predictions_count} />
                     </div>
                   </div>
                 ))}
               </div>
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[680px] text-left">
+                <table className="w-full min-w-[760px] text-left">
                 <thead className="bg-primary text-xs font-black uppercase text-primary-foreground">
                   <tr>
                     <th className="px-4 py-3">#</th>
@@ -79,6 +96,7 @@ export function Leaderboard() {
                     <th className="px-4 py-3">Exactos</th>
                     <th className="px-4 py-3">Diferencia</th>
                     <th className="px-4 py-3">Resultado</th>
+                    <th className="px-4 py-3">Goleadores</th>
                     <th className="px-4 py-3">Predicciones</th>
                   </tr>
                 </thead>
@@ -98,6 +116,7 @@ export function Leaderboard() {
                       <td className="px-4 py-3 font-bold">{row.exact_scores}</td>
                       <td className="px-4 py-3 font-bold">{row.goal_differences}</td>
                       <td className="px-4 py-3 font-bold">{row.outcomes}</td>
+                      <td className="px-4 py-3 font-bold">{row.scorer_hits}</td>
                       <td className="px-4 py-3 font-bold">{row.predictions_count}</td>
                     </tr>
                   ))}

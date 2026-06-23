@@ -20,7 +20,7 @@ export function AppLayout() {
                 <Trophy className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-black text-primary">La Gaitana Farms</p>
+                <p className="truncate text-sm font-black text-primary">Familia Pardo</p>
                 <p className="truncate text-xs font-bold text-muted-foreground">{profile?.full_name}</p>
               </div>
             </div>

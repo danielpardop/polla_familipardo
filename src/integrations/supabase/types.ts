@@ -287,6 +287,7 @@ export type Database = {
           exact_scores: number;
           goal_differences: number;
           outcomes: number;
+          scorer_hits: number;
           predictions_count: number;
         }[];
       };

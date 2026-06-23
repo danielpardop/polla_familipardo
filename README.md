@@ -1,6 +1,6 @@
-# Polla Colombia 2026 - La Gaitana Farms
+# Polla Colombia 2026 - Familia Pardo
 
-App web para predecir solo los partidos de Colombia en el Mundial 2026.
+App web familiar para predecir solo los partidos de Colombia en el Mundial 2026.
 
 ## Stack
 

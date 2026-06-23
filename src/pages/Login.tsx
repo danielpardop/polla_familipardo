@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { KeyRound, ShieldCheck, Trophy, UserPlus } from "lucide-react";
+import { Eye, EyeOff, KeyRound, ShieldCheck, Trophy, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -208,6 +208,8 @@ function AuthFields({
   setEmail: (value: string) => void;
   setPassword: (value: string) => void;
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <>
       <div className="space-y-2">
@@ -224,15 +226,27 @@ function AuthFields({
       </div>
       <div className="space-y-2">
         <Label htmlFor="login-password">Contrasena</Label>
-        <Input
-          id="login-password"
-          type="password"
-          autoComplete="current-password"
-          minLength={6}
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
+        <div className="relative">
+          <Input
+            id="login-password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            minLength={6}
+            value={password}
+            className="pr-11"
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
+            onClick={() => setShowPassword((current) => !current)}
+            aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+            title={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
     </>
   );
