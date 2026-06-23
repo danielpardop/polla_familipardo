@@ -1,5 +1,5 @@
-import { FormEvent, useState } from "react";
-import { Eye, EyeOff, KeyRound, ShieldCheck, Trophy, UserPlus } from "lucide-react";
+import { FormEvent, type ReactNode, useState } from "react";
+import { Eye, EyeOff, Flag, KeyRound, ListChecks, ShieldCheck, Trophy, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,14 +75,15 @@ export function Login() {
               <Trophy className="h-6 w-6" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-black leading-tight">Polla Colombia 2026</h1>
-              <p className="mt-1 text-xs font-bold text-white/78">Marcador y goleadores de Colombia.</p>
+              <h1 className="text-2xl font-black leading-tight">Polla Familia Pardo</h1>
+              <p className="mt-1 text-xs font-bold text-white/78">Pronosticos de Colombia para jugar en familia.</p>
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <ScoreRule value="3" label="Exacto" />
-            <ScoreRule value="2" label="Diferencia" />
-            <ScoreRule value="1" label="Resultado" />
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <ScoreRule value="6" label="Marcador exacto" />
+            <ScoreRule value="4" label="Diferencia o empate" />
+            <ScoreRule value="3" label="Solo ganador" />
+            <ScoreRule value="+1" label="Por goleador" />
           </div>
         </section>
         <section className="relative hidden min-h-[560px] bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
@@ -91,15 +92,21 @@ export function Login() {
             <div className="grid h-14 w-14 place-items-center rounded-lg bg-secondary text-primary shadow-sm">
               <Trophy className="h-8 w-8" />
             </div>
-            <h1 className="mt-8 max-w-md text-5xl font-black leading-none">Polla Colombia 2026</h1>
+            <h1 className="mt-8 max-w-md text-5xl font-black leading-none">Polla Familia Pardo</h1>
             <p className="mt-4 max-w-sm text-base font-bold text-white/78">
-              Predice los partidos de Colombia, el marcador y los jugadores que hacen los goles.
+              Una dinamica familiar para seguir a Colombia: predice marcadores, escoge goleadores y suma puntos con cada acierto.
             </p>
+            <div className="mt-8 grid gap-3 text-sm font-bold text-white/82">
+              <LoginNote icon={<Flag className="h-4 w-4" />} text="Solo jugamos con los partidos de Colombia." />
+              <LoginNote icon={<ListChecks className="h-4 w-4" />} text="Tus predicciones quedan bloqueadas cuando empieza el partido." />
+              <LoginNote icon={<Users className="h-4 w-4" />} text="La tabla muestra total, puntos por marcador y goleadores acertados." />
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <ScoreRule value="3" label="Exacto" />
-            <ScoreRule value="2" label="Diferencia" />
-            <ScoreRule value="1" label="Resultado" />
+          <div className="grid grid-cols-4 gap-3">
+            <ScoreRule value="6" label="Exacto" />
+            <ScoreRule value="4" label="Diferencia / empate" />
+            <ScoreRule value="3" label="Ganador" />
+            <ScoreRule value="+1" label="Goleador" />
           </div>
         </section>
 
@@ -107,9 +114,13 @@ export function Login() {
           <CardHeader className="p-4 pb-3 sm:p-5 sm:pb-3">
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              Acceso
+              Entra a la polla
             </CardTitle>
-            <CardDescription>{showRecovery ? "Recibe un enlace para cambiar tu contrasena." : "Entra o crea tu cuenta con Supabase Auth."}</CardDescription>
+            <CardDescription>
+              {showRecovery
+                ? "Te enviamos un enlace para crear una contrasena nueva."
+                : "Usa tu correo para entrar o crear tu cuenta. No necesitas confirmar el correo para empezar."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
@@ -121,7 +132,7 @@ export function Login() {
                 {showRecovery ? (
                   <form className="space-y-4" onSubmit={handlePasswordReset}>
                     <div className="rounded-md border bg-muted/65 p-3 text-sm font-bold text-muted-foreground">
-                      Escribe el correo de tu cuenta y te enviaremos el enlace para crear una contrasena nueva.
+                      Escribe el correo con el que te registraste y te enviaremos el enlace para recuperar el acceso.
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="reset-email">Correo</Label>
@@ -144,6 +155,9 @@ export function Login() {
                   </form>
                 ) : (
                   <form className="space-y-4" onSubmit={handleLogin}>
+                    <div className="rounded-md bg-secondary/25 p-3 text-sm font-extrabold text-primary">
+                      Hola familia, entra para guardar tus pronosticos y ver como va la tabla.
+                    </div>
                     <AuthFields email={email} password={password} setEmail={setEmail} setPassword={setPassword} />
                     <div className="flex justify-end">
                       <button
@@ -163,6 +177,9 @@ export function Login() {
               </TabsContent>
               <TabsContent value="register">
                 <form className="space-y-4" onSubmit={handleRegister}>
+                  <div className="rounded-md bg-muted/65 p-3 text-sm font-bold text-muted-foreground">
+                    Crea tu cuenta con tu nombre para que la familia te reconozca en la tabla.
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-name">Nombre completo</Label>
                     <Input
@@ -193,6 +210,15 @@ function ScoreRule({ value, label }: { value: string; label: string }) {
     <div className="min-w-0 rounded-md bg-white/10 p-3 sm:p-4">
       <p className="text-xl font-black text-secondary sm:text-2xl">{value}</p>
       <p className="truncate text-[11px] font-extrabold text-white/75 sm:text-xs">{label}</p>
+    </div>
+  );
+}
+
+function LoginNote({ icon, text }: { icon: ReactNode; text: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-md bg-white/10 p-3">
+      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/12 text-secondary">{icon}</span>
+      <span>{text}</span>
     </div>
   );
 }
