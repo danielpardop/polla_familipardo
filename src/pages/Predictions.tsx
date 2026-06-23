@@ -323,6 +323,7 @@ function PredictionCard({
   onSave: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const canPredict = isPredictionOpen(match, nowMs);
+  const isFinished = match.status === "finished";
 
   return (
     <Card className={cn("min-w-0 overflow-visible", canPredict ? "border-2 border-secondary/80" : "")}>
@@ -343,13 +344,16 @@ function PredictionCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-4 sm:p-5">
-        {match.status === "finished" ? (
-          <div className="break-words rounded-md border bg-muted/70 p-3 text-sm font-extrabold">
-            Resultado final: {match.home_team} {formatScore(match.home_goals, match.away_goals)} {match.away_team}
-          </div>
+        {isFinished ? (
+          <FinishedMatchSummary
+            match={match}
+            prediction={prediction}
+            playersByTeam={playersByTeam}
+            matchScorers={matchScorers}
+          />
+        ) : matchScorers.length > 0 ? (
+          <ActualScorers scorers={matchScorers} />
         ) : null}
-
-        {matchScorers.length > 0 ? <ActualScorers scorers={matchScorers} /> : null}
 
         {canPredict ? (
           <form className="space-y-4" onSubmit={onSave}>
@@ -380,7 +384,7 @@ function PredictionCard({
               </Button>
             </div>
           </form>
-        ) : (
+        ) : isFinished ? null : (
           <div className="rounded-md border bg-white/90 p-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <PredictionSummary prediction={prediction} match={match} playersByTeam={playersByTeam} canPredict={canPredict} />
@@ -506,6 +510,205 @@ function ActualScorers({ scorers }: { scorers: MatchScorerWithPlayer[] }) {
   );
 }
 
+function FinishedMatchSummary({
+  match,
+  prediction,
+  playersByTeam,
+  matchScorers,
+}: {
+  match: Match;
+  prediction?: PredictionWithScorers;
+  playersByTeam: Map<string, Player[]>;
+  matchScorers: MatchScorerWithPlayer[];
+}) {
+  const playersById = playersMapById(playersByTeam);
+  const actualScorers = matchScorers
+    .slice()
+    .sort((a, b) => (a.minute ?? 999) - (b.minute ?? 999))
+    .map((scorer) => ({
+      id: scorer.id,
+      label: `${scorer.player?.name ?? "Jugador"}${scorer.minute ? ` ${scorer.minute}'` : ""}`,
+      teamName: scorer.team_name,
+    }));
+  const scorerRows = prediction ? buildScorerPointRows(prediction, matchScorers, playersById) : [];
+  const scorePoints = prediction?.points ?? 0;
+  const scorerPoints = scorerRows.reduce((sum, scorer) => sum + scorer.points, 0);
+  const totalPoints = scorePoints + scorerPoints;
+
+  return (
+    <div className="min-w-0 space-y-3 rounded-md border bg-white/95 p-3">
+      <div className="grid min-w-0 gap-3 lg:grid-cols-2">
+        <ResultPanel
+          title="Resultado real"
+          score={`${match.home_team} ${formatScore(match.home_goals, match.away_goals)} ${match.away_team}`}
+          scorers={actualScorers}
+          homeTeam={match.home_team}
+          awayTeam={match.away_team}
+          emptyScorers="Sin goleadores registrados."
+          splitByTeam
+        />
+        <ResultPanel
+          title="Tu prediccion"
+          score={
+            prediction
+              ? `${match.home_team} ${prediction.home_goals} - ${prediction.away_goals} ${match.away_team}`
+              : "Apuesta no realizada"
+          }
+          scorers={scorerRows.map((scorer) => ({
+            id: scorer.id,
+            label: scorer.label,
+            teamName: scorer.teamName,
+            points: scorer.points,
+            hit: scorer.hit,
+          }))}
+          homeTeam={match.home_team}
+          awayTeam={match.away_team}
+          emptyScorers={prediction ? "Sin goleadores en tu prediccion." : "0 pts"}
+          showPoints
+          splitByTeam
+        />
+      </div>
+
+      <div className="min-w-0 rounded-md border bg-muted/45 p-3">
+        <div className="mb-2 flex min-w-0 flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-black text-primary">Puntos de tu prediccion</p>
+          <Badge variant="secondary">{totalPoints} pts total</Badge>
+        </div>
+        {prediction ? (
+          <div className="grid gap-2 text-sm font-bold text-muted-foreground sm:grid-cols-2">
+            <PointItem label={scorePointLabel(prediction.points)} points={scorePoints} earned={scorePoints > 0} />
+            <PointItem
+              label={`${scorerPoints} goleador${scorerPoints === 1 ? "" : "es"} acertado${scorerPoints === 1 ? "" : "s"}`}
+              points={scorerPoints}
+              earned={scorerPoints > 0}
+            />
+          </div>
+        ) : (
+          <p className="text-sm font-bold text-muted-foreground">No registraste prediccion para este partido. Total: 0 pts.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ResultPanel({
+  title,
+  score,
+  scorers,
+  homeTeam,
+  awayTeam,
+  emptyScorers,
+  showPoints = false,
+  splitByTeam = false,
+}: {
+  title: string;
+  score: string;
+  scorers: {
+    id: string;
+    label: string;
+    teamName: string;
+    points?: number;
+    hit?: boolean;
+  }[];
+  homeTeam?: string;
+  awayTeam?: string;
+  emptyScorers: string;
+  showPoints?: boolean;
+  splitByTeam?: boolean;
+}) {
+  const homeScorers = homeTeam ? scorers.filter((scorer) => scorer.teamName === homeTeam) : [];
+  const awayScorers = awayTeam ? scorers.filter((scorer) => scorer.teamName === awayTeam) : [];
+
+  return (
+    <div className="min-w-0 space-y-2 rounded-md border bg-muted/35 p-3">
+      <p className="text-xs font-black uppercase text-primary">{title}</p>
+      <p className="break-words text-base font-black text-foreground">{score}</p>
+      {splitByTeam && homeTeam && awayTeam ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <ScorerTeamColumn teamName={homeTeam} scorers={homeScorers} showPoints={showPoints} emptyText="Sin goles" />
+          <ScorerTeamColumn teamName={awayTeam} scorers={awayScorers} showPoints={showPoints} emptyText="Sin goles" />
+        </div>
+      ) : (
+        <ScorerBadges scorers={scorers} showPoints={showPoints} emptyText={emptyScorers} />
+      )}
+    </div>
+  );
+}
+
+function ScorerTeamColumn({
+  teamName,
+  scorers,
+  showPoints,
+  emptyText,
+}: {
+  teamName: string;
+  scorers: {
+    id: string;
+    label: string;
+    teamName: string;
+    points?: number;
+    hit?: boolean;
+  }[];
+  showPoints: boolean;
+  emptyText: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-md border bg-white/80 p-2">
+      <p className="mb-2 flex min-w-0 items-center gap-2 text-xs font-black text-primary">
+        <CountryFlag teamName={teamName} />
+        <span className="min-w-0 break-words">{teamName}</span>
+      </p>
+      <ScorerBadges scorers={scorers} showPoints={showPoints} emptyText={emptyText} />
+    </div>
+  );
+}
+
+function ScorerBadges({
+  scorers,
+  showPoints,
+  emptyText,
+}: {
+  scorers: {
+    id: string;
+    label: string;
+    teamName: string;
+    points?: number;
+    hit?: boolean;
+  }[];
+  showPoints: boolean;
+  emptyText: string;
+}) {
+  if (scorers.length === 0) {
+    return <span className="text-xs font-bold text-muted-foreground">{emptyText}</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {scorers.map((scorer) => (
+        <Badge key={scorer.id} variant={showPoints && !scorer.hit ? "muted" : "accent"} className="max-w-full whitespace-normal">
+          <span className="break-words">
+            {scorer.label}
+            {!showPoints ? ` / ${scorer.teamName}` : ""}
+            {showPoints ? ` / +${scorer.points ?? 0} pts` : ""}
+          </span>
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+function PointItem({ label, points, earned }: { label: string; points: number; earned: boolean }) {
+  return (
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-md border bg-white/90 p-2">
+      <span className="flex min-w-0 items-center gap-2">
+        <Check className={cn("h-4 w-4 shrink-0", earned ? "text-primary" : "text-muted-foreground")} />
+        <span className="min-w-0 break-words">{label}</span>
+      </span>
+      <Badge variant={earned ? "secondary" : "muted"}>{points} pts</Badge>
+    </div>
+  );
+}
+
 function PredictionSummary({
   prediction,
   match,
@@ -521,7 +724,7 @@ function PredictionSummary({
     return <div className="text-sm font-bold text-muted-foreground">{canPredict ? "Sin prediccion" : "Apuesta no realizada / 0 pts"}</div>;
   }
 
-  const playersById = new Map(Array.from(playersByTeam.values()).flat().map((player) => [player.id, playerLabel(player)]));
+  const playersById = playersMapById(playersByTeam);
   const scorerNames = prediction.scorers
     .slice()
     .sort((a, b) => a.slot_number - b.slot_number)
@@ -537,6 +740,47 @@ function PredictionSummary({
       {scorerNames.length > 0 ? <p className="break-words text-xs">Goles: {scorerNames.join(", ")}</p> : null}
     </div>
   );
+}
+
+function playersMapById(playersByTeam: Map<string, Player[]>) {
+  return new Map(Array.from(playersByTeam.values()).flat().map((player) => [player.id, playerLabel(player)]));
+}
+
+function buildScorerPointRows(
+  prediction: PredictionWithScorers,
+  matchScorers: MatchScorerWithPlayer[],
+  playersById: Map<string, string>,
+) {
+  const actualCounts = new Map<string, number>();
+  for (const scorer of matchScorers) {
+    actualCounts.set(scorer.player_id, (actualCounts.get(scorer.player_id) ?? 0) + 1);
+  }
+
+  const usedCounts = new Map<string, number>();
+  return prediction.scorers
+    .slice()
+    .sort((a, b) => a.slot_number - b.slot_number)
+    .map((scorer) => {
+      const used = usedCounts.get(scorer.player_id) ?? 0;
+      const hit = used < (actualCounts.get(scorer.player_id) ?? 0);
+      if (hit) usedCounts.set(scorer.player_id, used + 1);
+
+      return {
+        id: `${scorer.id}-${scorer.slot_number}`,
+        label: playersById.get(scorer.player_id) ?? "Jugador",
+        teamName: scorer.team_name,
+        hit,
+        points: hit ? 1 : 0,
+      };
+    });
+}
+
+function scorePointLabel(points: number | null) {
+  if (points === null) return "Marcador pendiente de calcular";
+  if (points === 6) return "Marcador exacto";
+  if (points === 4) return "Diferencia correcta";
+  if (points === 3) return "Resultado correcto";
+  return "Marcador sin acierto";
 }
 
 function TeamName({ name }: { name: string }) {
