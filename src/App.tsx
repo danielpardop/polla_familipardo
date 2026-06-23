@@ -8,6 +8,7 @@ import { Leaderboard } from "@/pages/Leaderboard";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { Predictions } from "@/pages/Predictions";
+import { ResetPassword } from "@/pages/ResetPassword";
 
 function RequireAuth({ children, adminOnly = false }: { children: JSX.Element; adminOnly?: boolean }) {
   const { user, profile, isAdmin, loading } = useAuth();
@@ -59,6 +60,7 @@ export function App() {
           </RequireSession>
         }
       />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<AppLayout />}>
         <Route
           path="/predictions"

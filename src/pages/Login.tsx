@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function Login() {
-  const { signInWithPassword, signUpWithPassword } = useAuth();
+  const { signInWithPassword, signUpWithPassword, sendPasswordReset } = useAuth();
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
@@ -38,9 +38,27 @@ export function Login() {
     setLoading(true);
     try {
       await signUpWithPassword(email, password, fullName);
-      toast.success("Cuenta creada. Si Supabase pide confirmacion, revisa tu correo.");
+      toast.success("Cuenta creada.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No pudimos crear la cuenta.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePasswordReset(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!email.trim()) {
+      toast.error("Escribe tu correo.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendPasswordReset(email);
+      toast.success("Te enviamos un enlace para cambiar la contrasena.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No pudimos enviar el correo.");
     } finally {
       setLoading(false);
     }
@@ -94,9 +112,10 @@ export function Login() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
-              <TabsList className="mb-4 grid w-full grid-cols-2">
+              <TabsList className="mb-4 grid w-full grid-cols-3">
                 <TabsTrigger value="login">Entrar</TabsTrigger>
                 <TabsTrigger value="register">Registro</TabsTrigger>
+                <TabsTrigger value="reset">Recuperar</TabsTrigger>
               </TabsList>
               <TabsContent value="login">
                 <form className="space-y-4" onSubmit={handleLogin}>
@@ -123,6 +142,25 @@ export function Login() {
                   <Button className="w-full" type="submit" disabled={loading}>
                     <UserPlus className="h-4 w-4" />
                     Crear cuenta
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="reset">
+                <form className="space-y-4" onSubmit={handlePasswordReset}>
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Correo</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="tu@correo.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button className="w-full" type="submit" disabled={loading}>
+                    Enviar enlace
                   </Button>
                 </form>
               </TabsContent>

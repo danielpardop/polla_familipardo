@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ListChecks, Lock, RefreshCw, ShieldCheck, Trophy, UsersRound } from "lucide-react";
+import { ListChecks, Lock, RefreshCw, ShieldCheck, Trash2, Trophy, UsersRound } from "lucide-react";
 import { toast } from "sonner";
 import { CountryFlag } from "@/components/CountryFlag";
 import { PageHeader } from "@/components/PageHeader";
@@ -183,6 +183,23 @@ export function Admin() {
     }
   }
 
+  async function deleteUser(user: AdminUser) {
+    if (!window.confirm(`Eliminar a ${user.full_name || user.email} de la app? Se borraran sus predicciones y no podra volver a entrar con esa cuenta.`)) {
+      return;
+    }
+
+    setSavingId(user.id);
+    try {
+      await api.deleteUserFromApp(user.id);
+      toast.success("Usuario eliminado de la app.");
+      await loadData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No pudimos eliminar el usuario.");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   return (
     <section className="space-y-5">
       <PageHeader
@@ -232,7 +249,13 @@ export function Admin() {
             </div>
           </TabsContent>
           <TabsContent value="users">
-            <UsersAdmin users={users} currentUserId={user?.id ?? null} savingId={savingId} onSetAdmin={setUserAdmin} />
+            <UsersAdmin
+              users={users}
+              currentUserId={user?.id ?? null}
+              savingId={savingId}
+              onSetAdmin={setUserAdmin}
+              onDeleteUser={deleteUser}
+            />
           </TabsContent>
         </Tabs>
       )}
@@ -357,11 +380,13 @@ function UsersAdmin({
   currentUserId,
   savingId,
   onSetAdmin,
+  onDeleteUser,
 }: {
   users: AdminUser[];
   currentUserId: string | null;
   savingId: string | null;
   onSetAdmin: (userId: string, isAdmin: boolean) => void;
+  onDeleteUser: (user: AdminUser) => void;
 }) {
   if (users.length === 0) {
     return (
@@ -396,6 +421,16 @@ function UsersAdmin({
               >
                 <ShieldCheck className="h-4 w-4" />
                 {item.is_admin ? "Quitar admin" : "Hacer admin"}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="w-full sm:w-auto"
+                disabled={savingId === item.id || item.id === currentUserId}
+                onClick={() => onDeleteUser(item)}
+              >
+                <Trash2 className="h-4 w-4" />
+                Eliminar
               </Button>
             </div>
           </div>

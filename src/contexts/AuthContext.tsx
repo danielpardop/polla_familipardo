@@ -13,6 +13,8 @@ type AuthContextValue = {
   loading: boolean;
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUpWithPassword: (email: string, password: string, fullName: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (fullName: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -92,6 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin(false);
   }, []);
 
+  const sendPasswordReset = useCallback(async (email: string) => {
+    await api.sendPasswordReset(email);
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    await api.updatePassword(password);
+  }, []);
+
   const updateProfile = useCallback(
     async (fullName: string) => {
       applyAuth(await api.updateProfile(fullName));
@@ -109,11 +119,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       signInWithPassword,
       signUpWithPassword,
+      sendPasswordReset,
+      updatePassword,
       signOut,
       updateProfile,
       refreshProfile,
     }),
-    [isAdmin, loading, profile, refreshProfile, role, session, signInWithPassword, signOut, signUpWithPassword, updateProfile],
+    [isAdmin, loading, profile, refreshProfile, role, sendPasswordReset, session, signInWithPassword, signOut, signUpWithPassword, updatePassword, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

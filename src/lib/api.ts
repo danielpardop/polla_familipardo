@@ -59,6 +59,10 @@ async function getAuthPayload(): Promise<AuthPayload> {
 
   const { data: profile, error: profileError } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
   if (profileError) throw new Error(profileError.message);
+  if (profile?.deleted_at) {
+    await supabase.auth.signOut();
+    throw new Error("Esta cuenta fue eliminada por un administrador.");
+  }
 
   const { data: roles, error: rolesError } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
   if (rolesError) throw new Error(rolesError.message);
@@ -107,6 +111,17 @@ export const api = {
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
     return { ok: true as const };
+  },
+
+  async sendPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw new Error(error.message);
+  },
+
+  async updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw new Error(error.message);
   },
 
   async updateProfile(fullName: string) {
@@ -233,7 +248,7 @@ export const api = {
 
   async listAdminUsers() {
     const [{ data: profiles, error: profilesError }, { data: roles, error: rolesError }] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at", { ascending: true }),
+      supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: true }),
       supabase.from("user_roles").select("*"),
     ]);
 
@@ -259,6 +274,23 @@ export const api = {
     }
 
     const { error: profileError } = await supabase.from("profiles").update({ role: isAdmin ? "admin" : "user" }).eq("id", userId);
+    if (profileError) throw new Error(profileError.message);
+  },
+
+  async deleteUserFromApp(userId: string) {
+    const { error: predictionsError } = await supabase.from("predictions").delete().eq("user_id", userId);
+    if (predictionsError) throw new Error(predictionsError.message);
+
+    const { error: rolesError } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (rolesError) throw new Error(rolesError.message);
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({
+        deleted_at: new Date().toISOString(),
+        role: "user",
+      })
+      .eq("id", userId);
     if (profileError) throw new Error(profileError.message);
   },
 

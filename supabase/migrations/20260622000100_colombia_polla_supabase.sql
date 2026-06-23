@@ -36,6 +36,7 @@ create table public.profiles (
   email text not null,
   full_name text,
   role public.app_role not null default 'user',
+  deleted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -244,6 +245,7 @@ as $$
   from public.profiles
   left join public.predictions on predictions.user_id = profiles.id
   where auth.role() = 'authenticated'
+    and profiles.deleted_at is null
     and not exists (
       select 1
       from public.user_roles
