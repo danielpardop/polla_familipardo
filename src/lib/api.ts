@@ -10,6 +10,8 @@ export type PredictionScorer = Database["public"]["Tables"]["prediction_scorers"
 export type MatchScorer = Database["public"]["Tables"]["match_scorers"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type LeaderboardRow = Database["public"]["Functions"]["get_leaderboard"]["Returns"][number];
+export type FinishedPredictionRow =
+  Database["public"]["Functions"]["get_finished_predictions_for_user"]["Returns"][number];
 
 export type AppUser = {
   id: string;
@@ -242,6 +244,12 @@ export const api = {
 
   async getLeaderboard() {
     const { data, error } = await supabase.rpc("get_leaderboard");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+
+  async getFinishedPredictionsForUser(userId: string) {
+    const { data, error } = await supabase.rpc("get_finished_predictions_for_user", { p_user_id: userId });
     if (error) throw new Error(error.message);
     return data ?? [];
   },

@@ -292,6 +292,24 @@ export type Database = {
           predictions_count: number;
         }[];
       };
+      get_finished_predictions_for_user: {
+        Args: { p_user_id: string };
+        Returns: {
+          match_id: string;
+          match_code: string;
+          display_order: number;
+          home_team: string;
+          away_team: string;
+          home_goals: number;
+          away_goals: number;
+          prediction_home_goals: number;
+          prediction_away_goals: number;
+          score_points: number;
+          scorer_hits: number;
+          total_points: number;
+          scorers: Json;
+        }[];
+      };
       has_role: {
         Args: { _user_id: string; _role: Database["public"]["Enums"]["app_role"] };
         Returns: boolean;
