@@ -125,15 +125,32 @@ export function Leaderboard() {
                 <tbody className="divide-y">
                   {rows.map((row, index) => (
                     <tr key={row.user_id} className="bg-white/92 transition-colors hover:bg-secondary/10">
-                      <td className="px-4 py-3 font-black">
-                        <span className="inline-flex items-center gap-2">
-                          {index === 0 ? <Medal className="h-4 w-4 text-secondary" /> : null}
-                          {index + 1}
+                      <td className="px-4 py-2.5 font-black">
+                        <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-md bg-muted px-2 text-xs text-primary">
+                          {index === 0 ? <Medal className="h-3.5 w-3.5 text-secondary" /> : `#${index + 1}`}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="min-w-0 truncate font-extrabold">{row.full_name}</span>
+                      <td className="px-4 py-2.5">
+                        <span className="block min-w-0 truncate text-sm font-extrabold">{row.full_name}</span>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <Badge variant="secondary" className="px-2 py-0.5 text-[11px]">
+                          {row.total_points} pts
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-2.5 text-sm font-bold">{row.score_points}</td>
+                      <td className="px-4 py-2.5 text-sm font-bold">
+                        <span className="inline-flex items-center gap-1">
+                          <Flag className="h-3.5 w-3.5 text-secondary" />
+                          {row.scorer_hits}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-sm font-bold">{row.exact_scores}</td>
+                      <td className="px-4 py-2.5 text-sm font-bold">{row.goal_differences}</td>
+                      <td className="px-4 py-2.5 text-sm font-bold">{row.outcomes}</td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center justify-end gap-3">
+                          <span className="text-sm font-bold">{row.predictions_count}</span>
                           <Button
                             type="button"
                             variant="outline"
@@ -146,20 +163,6 @@ export function Leaderboard() {
                           </Button>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="secondary">{row.total_points} pts</Badge>
-                      </td>
-                      <td className="px-4 py-3 font-bold">{row.score_points}</td>
-                      <td className="px-4 py-3 font-bold">
-                        <span className="inline-flex items-center gap-1">
-                          <Flag className="h-4 w-4 text-secondary" />
-                          {row.scorer_hits}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-bold">{row.exact_scores}</td>
-                      <td className="px-4 py-3 font-bold">{row.goal_differences}</td>
-                      <td className="px-4 py-3 font-bold">{row.outcomes}</td>
-                      <td className="px-4 py-3 font-bold">{row.predictions_count}</td>
                     </tr>
                   ))}
                 </tbody>
