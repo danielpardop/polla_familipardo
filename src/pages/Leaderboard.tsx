@@ -127,11 +127,25 @@ export function Leaderboard() {
                     <tr key={row.user_id} className="bg-white/92 transition-colors hover:bg-secondary/10">
                       <td className="px-4 py-3 font-black">
                         <span className="inline-flex items-center gap-2">
-                          {index < 3 ? <Medal className="h-4 w-4 text-secondary" /> : null}
+                          {index === 0 ? <Medal className="h-4 w-4 text-secondary" /> : null}
                           {index + 1}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-extrabold">{row.full_name}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="min-w-0 truncate font-extrabold">{row.full_name}</span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 shrink-0 rounded-full"
+                            onClick={() => showRowDetails(row, index)}
+                            aria-label={`Ver detalles de ${row.full_name}`}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
                       <td className="px-4 py-3">
                         <Badge variant="secondary">{row.total_points} pts</Badge>
                       </td>
