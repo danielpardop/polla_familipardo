@@ -82,23 +82,26 @@ export function Leaderboard() {
             <>
               <div className="divide-y lg:hidden">
                 {rows.map((row, index) => (
-                  <div key={row.user_id} className="bg-white/92 px-3 py-3 sm:px-4">
-                    <div className="grid min-h-12 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2">
-                      <p className="min-w-0 truncate text-sm font-extrabold text-foreground sm:text-base">
+                  <div key={row.user_id} className="bg-white/92 px-3 py-2.5 sm:px-4">
+                    <div className="grid min-h-10 grid-cols-[2.25rem_minmax(0,1fr)_auto_auto] items-center gap-2">
+                      <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-muted text-xs font-black text-primary">
+                        {index < 3 ? <Medal className="h-3.5 w-3.5 text-secondary" /> : `#${index + 1}`}
+                      </div>
+                      <p className="min-w-0 truncate text-sm font-extrabold leading-tight text-foreground sm:text-[15px]">
                         {row.full_name}
                       </p>
-                      <Badge variant="secondary" className="shrink-0">
+                      <Badge variant="secondary" className="shrink-0 px-2 py-0.5 text-[11px] sm:text-xs">
                         {row.total_points} pts
                       </Badge>
                       <Button
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="h-9 w-9 shrink-0 rounded-full"
+                        className="h-8 w-8 shrink-0 rounded-full"
                         onClick={() => showRowDetails(row, index)}
                         aria-label={`Ver detalles de ${row.full_name}`}
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
